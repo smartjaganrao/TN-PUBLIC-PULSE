@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { districts } from '../data/districts';
 import { parties, Party } from '../data/parties';
 import { submitVote, hasVotedLocally } from '../services/voteService';
-import { CheckCircle2, AlertCircle, Share2, Copy, Check, ArrowLeft, ArrowRight, User, Loader2, Vote } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Share2, Copy, Check, ArrowLeft, ArrowRight, User, Loader2, Vote, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 const VotePage: React.FC = () => {
@@ -18,6 +18,7 @@ const VotePage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState(1);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -112,164 +113,148 @@ const VotePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12">
-      <div className="mb-12 space-y-4">
-        <Link to="/" className="text-zinc-500 hover:text-zinc-800 font-bold text-xs flex items-center gap-2 transition-colors uppercase tracking-widest">
-          <ArrowLeft size={14} />
-          Back to Home
-        </Link>
-        <h2 className="text-5xl font-black text-zinc-900 font-display tracking-tight">{t.startVoting}</h2>
-        <p className="text-zinc-500 max-w-xl font-medium">{t.disclaimer}</p>
+    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+      {/* Compact Header */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <Link to="/" className="text-zinc-400 hover:text-zinc-800 font-black text-[10px] flex items-center gap-2 transition-all uppercase tracking-widest">
+            <ArrowLeft size={12} />
+            Back
+          </Link>
+          <h2 className="text-3xl sm:text-4xl font-black text-zinc-900 font-display tracking-tight">Share Your Voice</h2>
+        </div>
+        
+        {/* Step Indicator */}
+        <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
+          {[1, 2].map((s) => (
+            <div 
+              key={s}
+              className={`h-2 w-12 rounded-full transition-all duration-500 ${
+                step >= s ? 'bg-[#046A38] shadow-lg shadow-emerald-100' : 'bg-zinc-100'
+              }`}
+            />
+          ))}
+          <span className="ml-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Step {step}/2</span>
+        </div>
       </div>
 
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-3xl mb-12 flex items-center gap-4 shadow-sm"
+          className="bg-rose-50 border border-rose-100 text-rose-700 p-4 rounded-2xl mb-8 flex items-center gap-3 shadow-sm"
         >
-          <div className="bg-red-100 p-2 rounded-full">
-            <AlertCircle size={24} />
-          </div>
-          <p className="font-bold">{error}</p>
+          <AlertCircle size={18} />
+          <p className="text-xs font-bold">{error}</p>
         </motion.div>
       )}
 
-      <div className="space-y-16">
-        {/* Step 1: Basic Info */}
-        <div className="space-y-8">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-zinc-900 text-white flex items-center justify-center font-black">1</div>
-            <h3 className="text-2xl font-black font-display">Your Information</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
-                {t.nickname}
-              </label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
-                <input
-                  type="text"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="e.g. Tamilan"
-                  disabled={!!error}
-                  className="w-full bg-white border border-zinc-200 rounded-2xl pl-12 pr-4 py-4 focus:ring-2 focus:ring-[#046A38] focus:border-transparent outline-none transition-all disabled:opacity-50 font-medium shadow-sm"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
-                {t.selectDistrict} *
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedDistrict}
-                  onChange={(e) => setSelectedDistrict(e.target.value)}
-                  disabled={!!error}
-                  className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-4 focus:ring-2 focus:ring-[#046A38] focus:border-transparent outline-none transition-all disabled:opacity-50 appearance-none font-medium shadow-sm"
-                >
-                  <option value="">-- {t.selectDistrict} --</option>
-                  {districts.map(d => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
-                  <ArrowRight size={20} className="rotate-90" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Step 2: Party Selection */}
-        <div className="space-y-8">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-zinc-900 text-white flex items-center justify-center font-black">2</div>
-            <h3 className="text-2xl font-black font-display">{t.selectParty}</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {parties.map((party) => (
-              <button
-                key={party.id}
-                onClick={() => setSelectedParty(party)}
-                disabled={!!error}
-                className={`relative overflow-hidden rounded-[2.5rem] border-2 transition-all duration-500 group ${
-                  selectedParty?.id === party.id
-                    ? 'border-[#046A38] bg-emerald-50/30 ring-8 ring-[#046A38]/5 shadow-2xl scale-[1.02]'
-                    : 'border-white bg-white hover:border-zinc-200 shadow-sm hover:shadow-xl'
-                } disabled:opacity-50`}
-              >
-                <div className="aspect-[4/3] w-full relative overflow-hidden p-8">
-                  <img 
-                    src={party.image} 
-                    alt={party.name}
-                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
-                    referrerPolicy="no-referrer"
-                  />
-                  {selectedParty?.id === party.id && (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="absolute inset-0 bg-[#046A38]/10 flex items-center justify-center backdrop-blur-[2px]"
-                    >
-                      <div className="bg-[#046A38] text-white p-4 rounded-full shadow-2xl">
-                        <CheckCircle2 size={40} />
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-                
-                <div className="p-6 bg-white border-t border-zinc-50 text-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: party.color }}
+      <AnimatePresence mode="wait">
+        {step === 1 ? (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="space-y-8"
+          >
+            <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
+                    {t.nickname}
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <input
+                      type="text"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      placeholder="e.g. Tamilan"
+                      className="w-full bg-zinc-50 border border-zinc-100 rounded-xl pl-12 pr-4 py-4 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all font-bold shadow-inner"
                     />
-                    <span className="text-2xl font-black text-zinc-900 tracking-tight font-display">
-                      {party.name}
-                    </span>
                   </div>
                 </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
+                    {t.selectDistrict} *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <select
+                      value={selectedDistrict}
+                      onChange={(e) => setSelectedDistrict(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-100 rounded-xl pl-12 pr-4 py-4 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all appearance-none font-bold shadow-inner"
+                    >
+                      <option value="">-- Select --</option>
+                      {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setStep(2)}
+                disabled={!selectedDistrict}
+                className="w-full bg-zinc-900 text-white py-5 rounded-full font-black text-lg shadow-xl hover:bg-zinc-800 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group"
+              >
+                Next Step
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <div className="pt-12 flex flex-col items-center gap-8">
-          <button
-            onClick={handleVote}
-            disabled={!selectedDistrict || !selectedParty || isSubmitting || !!error}
-            className="w-full max-w-xl bg-[#046A38] text-white py-6 rounded-full font-black text-2xl shadow-2xl shadow-emerald-200 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 disabled:shadow-none relative overflow-hidden group"
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="step2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-8"
           >
-            <span className="relative z-10 flex items-center justify-center gap-3">
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="animate-spin" size={28} />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Vote size={28} />
-                  {t.confirmVote}
-                </>
-              )}
-            </span>
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-          </button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {parties.map((party) => (
+                <button
+                  key={party.id}
+                  onClick={() => setSelectedParty(party)}
+                  className={`relative p-6 rounded-[2rem] border-2 transition-all duration-300 group ${
+                    selectedParty?.id === party.id
+                      ? 'border-[#046A38] bg-emerald-50 shadow-2xl scale-[1.05]'
+                      : 'border-white bg-white hover:border-zinc-100 shadow-sm'
+                  }`}
+                >
+                  <div className="aspect-square w-full mb-4">
+                    <img src={party.image} alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" referrerPolicy="no-referrer" />
+                  </div>
+                  <p className="text-xs sm:text-lg font-black text-zinc-900 font-display tracking-tight">{party.name}</p>
+                  {selectedParty?.id === party.id && (
+                    <div className="absolute top-3 right-3 bg-[#046A38] text-white p-1 rounded-full shadow-lg">
+                      <Check size={12} />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
 
-          <div className="flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
-            <Link to="/results" className="hover:text-[#046A38] transition-colors">Skip to Results</Link>
-            <div className="w-1 h-1 bg-zinc-300 rounded-full" />
-            <Link to="/forum" className="hover:text-[#046A38] transition-colors">Join Discussion</Link>
-          </div>
-        </div>
-      </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => setStep(1)}
+                className="flex-1 bg-white border border-zinc-200 text-zinc-900 py-5 rounded-full font-black text-lg hover:bg-zinc-50 transition-all"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleVote}
+                disabled={!selectedParty || isSubmitting}
+                className="flex-[2] bg-[#046A38] text-white py-5 rounded-full font-black text-xl shadow-2xl shadow-emerald-200 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+              >
+                {isSubmitting ? <Loader2 className="animate-spin" /> : <Vote />}
+                {t.confirmVote}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

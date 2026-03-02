@@ -92,6 +92,42 @@ h1, h2, h3, .font-display {
   transform: translateY(10px);
 }
 
+/* React Quill Custom Styles */
+.quill-editor-container .quill {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.quill-editor-container .ql-toolbar {
+  border: none !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f9fafb;
+  padding: 12px 24px !important;
+}
+
+.quill-editor-container .ql-container {
+  border: none !important;
+  flex: 1;
+  font-family: var(--font-sans) !important;
+  font-size: 0.875rem !important;
+}
+
+.quill-editor-container .ql-editor {
+  padding: 24px !important;
+  min-height: 350px;
+}
+
+.quill-editor-container .ql-editor.ql-blank::before {
+  left: 24px !important;
+  color: #9ca3af !important;
+  font-style: normal !important;
+}
+
+.prose img {
+  @apply rounded-3xl shadow-lg my-8;
+}
+
 .page-enter-active {
   opacity: 1;
   transform: translateY(0);

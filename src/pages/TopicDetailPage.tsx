@@ -99,50 +99,50 @@ const TopicDetailPage: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-10 sm:p-16 rounded-[4rem] border border-zinc-100 shadow-2xl space-y-12 relative overflow-hidden"
+        className="bg-white p-6 sm:p-16 rounded-[2.5rem] sm:rounded-[4rem] border border-zinc-100 shadow-2xl space-y-8 sm:space-y-12 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
           <MessageCircle size={200} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 relative z-10">
-          <span className="px-5 py-2 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-emerald-100">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 relative z-10">
+          <span className="px-3 py-1.5 sm:px-5 sm:py-2 bg-emerald-50 text-emerald-700 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg sm:rounded-xl border border-emerald-100">
             {topic.category}
           </span>
-          <div className="flex items-center gap-2 text-[10px] text-zinc-400 uppercase tracking-widest font-black">
-            <Clock size={14} />
+          <div className="flex items-center gap-2 text-[8px] sm:text-[10px] text-zinc-400 uppercase tracking-widest font-black">
+            <Clock size={12} className="sm:w-3.5 sm:h-3.5" />
             {formatTopicDate(topic.timestamp)}
           </div>
         </div>
 
-        <h1 className="text-5xl sm:text-7xl font-black text-zinc-900 font-display tracking-tighter leading-[0.9] relative z-10">
+        <h1 className="text-3xl sm:text-7xl font-black text-zinc-900 font-display tracking-tighter leading-[0.9] relative z-10">
           {topic.title}
         </h1>
 
-        <div className="flex items-center gap-6 py-8 border-y border-zinc-50 relative z-10">
-          <div className="w-16 h-16 rounded-3xl bg-zinc-900 flex items-center justify-center text-white font-black text-2xl shadow-xl">
+        <div className="flex items-center gap-4 sm:gap-6 py-6 sm:py-8 border-y border-zinc-50 relative z-10">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-zinc-900 flex items-center justify-center text-white font-black text-lg sm:text-2xl shadow-xl">
             {topic.nickname[0].toUpperCase()}
           </div>
           <div>
-            <p className="font-black text-xl text-zinc-900 leading-none mb-1">{topic.nickname}</p>
-            <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em]">Verified Contributor</p>
+            <p className="font-black text-base sm:text-xl text-zinc-900 leading-none mb-1">{topic.nickname}</p>
+            <p className="text-[8px] sm:text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em]">Verified Contributor</p>
           </div>
         </div>
 
-        <div className="text-2xl text-zinc-600 leading-relaxed font-medium whitespace-pre-wrap relative z-10 max-w-4xl">
+        <div className="text-lg sm:text-2xl text-zinc-600 leading-relaxed font-medium whitespace-pre-wrap relative z-10 max-w-4xl">
           {topic.content}
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 pt-6 relative z-10">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-4 sm:pt-6 relative z-10">
           <button
             onClick={handleUpvote}
-            className="flex items-center gap-3 px-8 py-4 bg-emerald-50 text-emerald-600 rounded-2xl font-black text-sm hover:bg-emerald-100 transition-all active:scale-95 border border-emerald-100"
+            className="flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 bg-emerald-50 text-emerald-600 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm hover:bg-emerald-100 transition-all active:scale-95 border border-emerald-100"
           >
-            <ThumbsUp size={20} />
+            <ThumbsUp size={16} className="sm:w-5 sm:h-5" />
             {topic.upvotes} Upvotes
           </button>
-          <div className="flex items-center gap-3 px-8 py-4 bg-zinc-50 text-zinc-500 rounded-2xl font-black text-sm border border-zinc-100">
-            <MessageCircle size={20} />
+          <div className="flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-8 sm:py-4 bg-zinc-50 text-zinc-500 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm border border-zinc-100">
+            <MessageCircle size={16} className="sm:w-5 sm:h-5" />
             {topic.replies?.length || 0} Replies
           </div>
         </div>
@@ -158,20 +158,20 @@ const TopicDetailPage: React.FC = () => {
         </div>
 
         {/* Reply Form */}
-        <div className="bg-zinc-50 p-10 sm:p-12 rounded-[3.5rem] border border-zinc-100 shadow-inner relative overflow-hidden group">
+        <div className="bg-zinc-50 p-6 sm:p-12 rounded-[2.5rem] sm:rounded-[3.5rem] border border-zinc-100 shadow-inner relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-focus-within:opacity-[0.06] transition-opacity">
             <Send size={80} />
           </div>
           
-          <form onSubmit={handleSubmitReply} className="space-y-8 relative z-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <form onSubmit={handleSubmitReply} className="space-y-6 sm:space-y-8 relative z-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-2">Your Nickname</label>
                 <input
                   type="text"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
-                  className="w-full bg-white border border-zinc-100 rounded-[2rem] px-8 py-5 outline-none focus:ring-4 focus:ring-[#046A38]/10 transition-all font-bold text-zinc-700 shadow-sm"
+                  className="w-full bg-white border border-zinc-100 rounded-2xl sm:rounded-[2rem] px-6 py-4 sm:px-8 sm:py-5 outline-none focus:ring-4 focus:ring-[#046A38]/10 transition-all font-bold text-zinc-700 shadow-sm"
                   placeholder="e.g. CitizenX"
                   required
                 />
@@ -183,7 +183,7 @@ const TopicDetailPage: React.FC = () => {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={4}
-                className="w-full bg-white border border-zinc-100 rounded-[2.5rem] px-8 py-6 outline-none focus:ring-4 focus:ring-[#046A38]/10 transition-all resize-none font-medium text-zinc-600 leading-relaxed shadow-sm"
+                className="w-full bg-white border border-zinc-100 rounded-[1.5rem] sm:rounded-[2.5rem] px-6 py-4 sm:px-8 sm:py-6 outline-none focus:ring-4 focus:ring-[#046A38]/10 transition-all resize-none font-medium text-zinc-600 leading-relaxed shadow-sm"
                 placeholder="Add your thoughts to the discussion..."
                 required
               />
@@ -191,7 +191,7 @@ const TopicDetailPage: React.FC = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="bg-zinc-900 text-white px-12 py-5 rounded-full font-black text-lg flex items-center gap-3 hover:bg-zinc-800 transition-all disabled:opacity-50 shadow-xl active:scale-95"
+              className="w-full sm:w-auto bg-zinc-900 text-white px-10 sm:px-12 py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all disabled:opacity-50 shadow-xl active:scale-95"
             >
               {submitting ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
               Post Contribution

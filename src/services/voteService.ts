@@ -14,7 +14,8 @@ import {
   serverTimestamp,
   onSnapshot,
   setDoc,
-  runTransaction
+  runTransaction,
+  deleteDoc
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -30,6 +31,17 @@ export interface Comment {
   content: string;
   partyId?: string;
   timestamp: any;
+  replyCount?: number;
+  likes?: number;
+}
+
+export interface CommentReply {
+  id: string;
+  commentId: string;
+  nickname: string;
+  content: string;
+  timestamp: any;
+  likes?: number;
 }
 
 export interface ForumTopic {
@@ -50,6 +62,19 @@ export interface ForumReply {
   nickname: string;
   content: string;
   timestamp: any;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  author: string;
+  category: string;
+  imageUrl: string;
+  timestamp: any;
+  views: number;
 }
 
 const DEVICE_ID_KEY = 'tn_2026_device_id';
@@ -139,7 +164,42 @@ export const postComment = async (nickname: string, content: string, partyId?: s
     nickname,
     content,
     partyId: partyId || null,
-    timestamp: serverTimestamp()
+    timestamp: serverTimestamp(),
+    replyCount: 0
+  });
+};
+
+export const postCommentReply = async (commentId: string, nickname: string, content: string) => {
+  const commentRef = doc(db, 'comments', commentId);
+  const repliesRef = collection(db, 'comments', commentId, 'replies');
+
+  await runTransaction(db, async (transaction) => {
+    const commentDoc = await transaction.get(commentRef);
+    if (!commentDoc.exists()) throw new Error("Comment does not exist!");
+
+    transaction.set(doc(repliesRef), {
+      nickname,
+      content,
+      timestamp: serverTimestamp()
+    });
+
+    transaction.update(commentRef, {
+      replyCount: increment(1)
+    });
+  });
+};
+
+export const likeComment = async (commentId: string) => {
+  const commentRef = doc(db, 'comments', commentId);
+  await updateDoc(commentRef, {
+    likes: increment(1)
+  });
+};
+
+export const likeCommentReply = async (commentId: string, replyId: string) => {
+  const replyRef = doc(db, 'comments', commentId, 'replies', replyId);
+  await updateDoc(replyRef, {
+    likes: increment(1)
   });
 };
 
@@ -233,6 +293,39 @@ export const upvoteForumTopic = async (id: string) => {
   });
 };
 
+// --- Blog ---
+export const getBlogPosts = async (): Promise<BlogPost[]> => {
+  const blogRef = collection(db, 'blog_posts');
+  const q = query(blogRef, orderBy('timestamp', 'desc'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+};
+
+export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
+  const blogRef = collection(db, 'blog_posts');
+  const q = query(blogRef, where('slug', '==', slug), limit(1));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.empty) return null;
+  const doc = querySnapshot.docs[0];
+  return { id: doc.id, ...doc.data() } as BlogPost;
+};
+
+export const postBlogPost = async (post: Omit<BlogPost, 'id' | 'timestamp' | 'views'>) => {
+  const blogRef = collection(db, 'blog_posts');
+  await addDoc(blogRef, {
+    ...post,
+    timestamp: serverTimestamp(),
+    views: 0
+  });
+};
+
+export const incrementBlogViews = async (id: string) => {
+  const blogRef = doc(db, 'blog_posts', id);
+  await updateDoc(blogRef, {
+    views: increment(1)
+  });
+};
+
 // --- Real-time Listeners ---
 export const subscribeToOverallResults = (callback: (results: any) => void) => {
   const votesRef = collection(db, 'votes');
@@ -273,6 +366,18 @@ export const subscribeToComments = (callback: (comments: Comment[]) => void) => 
   });
 };
 
+export const subscribeToCommentReplies = (commentId: string, callback: (replies: CommentReply[]) => void) => {
+  const repliesRef = collection(db, 'comments', commentId, 'replies');
+  const q = query(repliesRef, orderBy('timestamp', 'asc'));
+  return onSnapshot(q, (snapshot) => {
+    const replies = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as CommentReply));
+    callback(replies);
+  });
+};
+
 export const subscribeToForumTopics = (callback: (topics: ForumTopic[]) => void) => {
   const topicsRef = collection(db, 'forum_topics');
   const q = query(topicsRef, orderBy('timestamp', 'desc'));
@@ -285,10 +390,28 @@ export const subscribeToForumTopics = (callback: (topics: ForumTopic[]) => void)
   });
 };
 
+// --- Admin Functions ---
+export const getAllVotes = async () => {
+  const votesRef = collection(db, 'votes');
+  const q = query(votesRef, orderBy('timestamp', 'desc'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const getAllComments = async () => {
+  const commentsRef = collection(db, 'comments');
+  const q = query(commentsRef, orderBy('timestamp', 'desc'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const deleteDocument = async (collectionName: string, id: string) => {
+  const docRef = doc(db, collectionName, id);
+  await deleteDoc(docRef);
+};
+
 // --- Dev Tools ---
 export const clearAllData = async () => {
-  // Note: Deleting collections in Firestore is complex and usually done via CLI or Cloud Functions.
-  // For this demo, we'll just clear local storage.
   localStorage.removeItem(VOTE_FLAG_KEY);
   localStorage.removeItem(DEVICE_ID_KEY);
 };

@@ -72,6 +72,7 @@ const Footer: React.FC = () => {
             <span className="text-zinc-600">© 2026 TN Public Pulse</span>
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <Link to="/admin" className="text-zinc-800 hover:text-zinc-600 transition-colors">Admin</Link>
           </div>
           <div className="text-[10px] font-black uppercase tracking-widest text-zinc-600">
             Built for the People of Tamil Nadu

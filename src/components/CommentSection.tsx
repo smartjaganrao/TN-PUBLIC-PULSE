@@ -1,8 +1,260 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Send, User, Clock, Loader2, Heart } from 'lucide-react';
-import { subscribeToComments, postComment, Comment } from '../services/voteService';
+import { MessageSquare, Send, User, Clock, Loader2, Heart, Reply, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
+import { subscribeToComments, postComment, Comment, postCommentReply, subscribeToCommentReplies, CommentReply, likeComment, likeCommentReply } from '../services/voteService';
 import { parties } from '../data/parties';
+
+const CommentItem: React.FC<{ comment: Comment }> = ({ comment }) => {
+  const [showReplies, setShowReplies] = useState(false);
+  const [replies, setReplies] = useState<CommentReply[]>([]);
+  const [replyNickname, setReplyNickname] = useState('');
+  const [replyContent, setReplyContent] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
+  const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    if (showReplies) {
+      const unsubscribe = subscribeToCommentReplies(comment.id, (data) => {
+        setReplies(data);
+      });
+      return () => unsubscribe();
+    }
+  }, [showReplies, comment.id]);
+
+  const handleLike = async () => {
+    if (liked) return;
+    setLiked(true);
+    try {
+      await likeComment(comment.id);
+    } catch (e) {
+      console.error(e);
+      setLiked(false);
+    }
+  };
+
+  const handleReplyLike = async (replyId: string) => {
+    try {
+      await likeCommentReply(comment.id, replyId);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleShareComment = () => {
+    const text = `"${comment.content}" - ${comment.nickname} on TN Pulse 2026`;
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: 'TN Pulse Comment', text, url });
+    } else {
+      navigator.clipboard.writeText(`${text} ${url}`);
+      alert('Comment link copied to clipboard!');
+    }
+  };
+
+  const handleReplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyNickname.trim() || !replyContent.trim()) return;
+
+    setSubmittingReply(true);
+    try {
+      await postCommentReply(comment.id, replyNickname.trim(), replyContent.trim());
+      setReplyContent('');
+      setIsReplying(false);
+      setShowReplies(true);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingReply(false);
+    }
+  };
+
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return 'Just now';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm hover:shadow-md transition-shadow space-y-4"
+    >
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-black relative">
+            {comment.nickname[0].toUpperCase()}
+            {comment.partyId && (
+              <div 
+                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white overflow-hidden bg-white shadow-sm"
+                title={`Supports ${parties.find(p => p.id === comment.partyId)?.name}`}
+              >
+                <img 
+                  src={parties.find(p => p.id === comment.partyId)?.image} 
+                  alt="party" 
+                  className="w-full h-full object-contain p-0.5"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="font-black text-zinc-900">{comment.nickname}</h4>
+              {comment.partyId && (
+                <span 
+                  className="text-[8px] font-black px-1.5 py-0.5 rounded-full text-white uppercase tracking-tighter"
+                  style={{ backgroundColor: parties.find(p => p.id === comment.partyId)?.color }}
+                >
+                  {parties.find(p => p.id === comment.partyId)?.name}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1 text-[10px] text-zinc-400 uppercase tracking-widest font-bold">
+              <Clock size={10} />
+              {formatTime(comment.timestamp)}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <p className="text-zinc-600 leading-relaxed">
+        {comment.content}
+      </p>
+
+      <div className="flex items-center gap-4 pt-2">
+        <button 
+          onClick={handleLike}
+          className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest transition-colors ${liked ? 'text-rose-500' : 'text-zinc-400 hover:text-rose-500'}`}
+        >
+          <Heart size={12} className={liked ? 'fill-rose-500' : ''} />
+          {comment.likes || 0} Likes
+        </button>
+
+        <button 
+          onClick={() => setIsReplying(!isReplying)}
+          className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-600 transition-colors"
+        >
+          <Reply size={12} />
+          {isReplying ? 'Cancel' : 'Reply'}
+        </button>
+
+        <button 
+          onClick={handleShareComment}
+          className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600 transition-colors"
+        >
+          <Share2 size={12} />
+          Share
+        </button>
+        
+        {comment.replyCount && comment.replyCount > 0 ? (
+          <button 
+            onClick={() => setShowReplies(!showReplies)}
+            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600 transition-colors"
+          >
+            {showReplies ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            {comment.replyCount} {comment.replyCount === 1 ? 'Reply' : 'Replies'}
+          </button>
+        ) : null}
+      </div>
+
+      {/* Reply Form */}
+      <AnimatePresence>
+        {isReplying && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <form onSubmit={handleReplySubmit} className="mt-4 space-y-3 bg-zinc-50 p-4 rounded-2xl border border-zinc-100">
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+                <input
+                  type="text"
+                  value={replyNickname}
+                  onChange={(e) => setReplyNickname(e.target.value)}
+                  placeholder="Your nickname"
+                  className="w-full bg-white border border-zinc-200 rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="flex gap-2">
+                <textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  placeholder="Your reply..."
+                  rows={2}
+                  className="flex-1 bg-white border border-zinc-200 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={submittingReply || !replyNickname.trim() || !replyContent.trim()}
+                  className="bg-indigo-600 text-white px-4 rounded-xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center justify-center"
+                >
+                  {submittingReply ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Replies List */}
+      <AnimatePresence>
+        {showReplies && replies.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden space-y-3 pt-2"
+          >
+            {replies.map((reply) => (
+              <div key={reply.id} className="flex gap-3 pl-6 border-l-2 border-zinc-100">
+                <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 font-black text-xs shrink-0">
+                  {reply.nickname[0].toUpperCase()}
+                </div>
+                <div className="flex-1 bg-zinc-50 p-3 rounded-2xl border border-zinc-100">
+                  <div className="flex items-center justify-between mb-1">
+                    <h5 className="text-[10px] font-black text-zinc-900">{reply.nickname}</h5>
+                    <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+                      {formatTime(reply.timestamp)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-relaxed">
+                    {reply.content}
+                  </p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <button 
+                      onClick={() => handleReplyLike(reply.id)}
+                      className="flex items-center gap-1 text-[9px] font-bold text-zinc-400 hover:text-rose-500 transition-colors"
+                    >
+                      <Heart size={10} />
+                      {reply.likes || 0}
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setIsReplying(true);
+                        setReplyContent(`@${reply.nickname} `);
+                      }}
+                      className="flex items-center gap-1 text-[9px] font-bold text-zinc-400 hover:text-indigo-500 transition-colors"
+                    >
+                      <Reply size={10} />
+                      Reply
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
 
 const CommentSection: React.FC = () => {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -36,12 +288,6 @@ const CommentSection: React.FC = () => {
     }
   };
 
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return 'Just now';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-3 mb-6">
@@ -54,80 +300,72 @@ const CommentSection: React.FC = () => {
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Comment Form */}
-        <div className="lg:col-span-1">
-          <div className="glass p-8 rounded-[2.5rem] sticky top-8">
-            <h3 className="text-xl font-black mb-6 font-display">Join the Conversation</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
-                  Your Nickname
-                </label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                  <input
-                    type="text"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    placeholder="e.g. Tamilan"
-                    className="w-full bg-white border border-zinc-200 rounded-2xl pl-12 pr-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+        <div className="w-full">
+          <div className="glass p-6 rounded-[2rem] mb-8">
+            <h3 className="text-lg font-black mb-4 font-display">Join the Conversation</h3>
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 items-end">
+              <div className="flex-1 w-full space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Nickname</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+                      <input
+                        type="text"
+                        value={nickname}
+                        onChange={(e) => setNickname(e.target.value)}
+                        placeholder="e.g. Tamilan"
+                        className="w-full bg-white border border-zinc-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Support (Optional)</label>
+                    <div className="flex gap-1">
+                      {parties.map(p => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setSelectedPartyId(selectedPartyId === p.id ? '' : p.id)}
+                          className={`relative w-8 h-8 rounded-lg border transition-all overflow-hidden p-0.5 ${
+                            selectedPartyId === p.id ? 'border-indigo-500 scale-110 shadow-md' : 'border-transparent bg-zinc-50 opacity-60'
+                          }`}
+                          title={p.name}
+                        >
+                          <img src={p.image} alt={p.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Your Thoughts</label>
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="What's your prediction for 2026?"
+                    rows={2}
+                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
                     required
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
-                  Supporting Party (Optional)
-                </label>
-                <div className="grid grid-cols-5 gap-2">
-                  {parties.map(p => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setSelectedPartyId(selectedPartyId === p.id ? '' : p.id)}
-                      className={`relative aspect-square rounded-xl border-2 transition-all overflow-hidden p-1 ${
-                        selectedPartyId === p.id ? 'border-indigo-500 scale-110 shadow-lg' : 'border-transparent bg-zinc-50 opacity-60 hover:opacity-100'
-                      }`}
-                      title={p.name}
-                    >
-                      <img src={p.image} alt={p.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                      {selectedPartyId === p.id && (
-                        <div className="absolute inset-0 bg-indigo-500/10 flex items-center justify-center">
-                          <Heart size={16} className="text-indigo-500 fill-indigo-500" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
-                  Your Thoughts
-                </label>
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="What's your prediction for 2026?"
-                  rows={4}
-                  className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none"
-                  required
-                />
-              </div>
               <button
                 type="submit"
                 disabled={submitting || !nickname.trim() || !content.trim()}
-                className="w-full bg-indigo-600 text-white py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all disabled:opacity-50 shadow-lg shadow-indigo-200"
+                className="bg-indigo-600 text-white p-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 shadow-lg shadow-indigo-200 h-fit"
               >
                 {submitting ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
-                Post Comment
               </button>
             </form>
           </div>
         </div>
 
-        {/* Comments List */}
-        <div className="lg:col-span-2 space-y-4">
+        {/* Comments List - Scrollable */}
+        <div className="w-full space-y-4 max-h-[600px] overflow-y-auto pr-2 no-scrollbar">
           {loading ? (
             <div className="flex justify-center py-12">
               <Loader2 className="animate-spin text-indigo-500" size={32} />
@@ -135,60 +373,13 @@ const CommentSection: React.FC = () => {
           ) : comments.length > 0 ? (
             <AnimatePresence mode="popLayout">
               {comments.map((comment) => (
-                <motion.div
-                  key={comment.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-black relative">
-                        {comment.nickname[0].toUpperCase()}
-                        {comment.partyId && (
-                          <div 
-                            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white overflow-hidden bg-white shadow-sm"
-                            title={`Supports ${parties.find(p => p.id === comment.partyId)?.name}`}
-                          >
-                            <img 
-                              src={parties.find(p => p.id === comment.partyId)?.image} 
-                              alt="party" 
-                              className="w-full h-full object-contain p-0.5"
-                              referrerPolicy="no-referrer"
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-black text-zinc-900">{comment.nickname}</h4>
-                          {comment.partyId && (
-                            <span 
-                              className="text-[8px] font-black px-1.5 py-0.5 rounded-full text-white uppercase tracking-tighter"
-                              style={{ backgroundColor: parties.find(p => p.id === comment.partyId)?.color }}
-                            >
-                              {parties.find(p => p.id === comment.partyId)?.name}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] text-zinc-400 uppercase tracking-widest font-bold">
-                          <Clock size={10} />
-                          {formatTime(comment.timestamp)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-zinc-600 leading-relaxed">
-                    {comment.content}
-                  </p>
-                </motion.div>
+                <CommentItem key={comment.id} comment={comment} />
               ))}
             </AnimatePresence>
           ) : (
-            <div className="bg-zinc-50 rounded-[3rem] p-20 text-center border-2 border-dashed border-zinc-200">
-              <div className="text-4xl mb-4">💬</div>
-              <p className="text-zinc-400 font-medium">No comments yet. Be the first to speak!</p>
+            <div className="bg-zinc-50 rounded-[2rem] p-12 text-center border-2 border-dashed border-zinc-200">
+              <div className="text-2xl mb-2">💬</div>
+              <p className="text-zinc-400 text-sm font-medium">No comments yet. Be the first to speak!</p>
             </div>
           )}
         </div>

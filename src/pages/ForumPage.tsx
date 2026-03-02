@@ -76,16 +76,16 @@ const ForumPage: React.FC = () => {
             <ArrowLeft size={12} />
             Back to Home
           </Link>
-          <h1 className="text-6xl sm:text-7xl font-black text-zinc-900 font-display tracking-tighter leading-none">
-            People's <span className="text-[#046A38]">Manifesto</span>
+          <h1 className="text-4xl sm:text-7xl font-black text-zinc-900 font-display tracking-tighter leading-none">
+            Community <span className="text-[#046A38]">Debate</span>
           </h1>
-          <p className="text-zinc-500 max-w-2xl font-medium text-lg leading-relaxed">
-            What do you want from the CM in 2026? Share your vision, discuss needs, and vote for the most important issues facing Tamil Nadu.
+          <p className="text-zinc-500 max-w-2xl font-medium text-base sm:text-lg leading-relaxed">
+            What matters most to you in Tamil Nadu today? Share your vision, discuss community needs, and vote for the most important issues facing our society.
           </p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-zinc-900 text-white px-10 py-5 rounded-full font-black text-lg flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all shadow-2xl shadow-zinc-200 active:scale-95 group"
+          className="bg-zinc-900 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all shadow-2xl shadow-zinc-200 active:scale-95 group w-full sm:w-auto"
         >
           <Plus size={24} className="group-hover:rotate-90 transition-transform duration-500" />
           Start a Topic
@@ -141,53 +141,52 @@ const ForumPage: React.FC = () => {
                   <div className="flex sm:flex-col items-center gap-4">
                     <button
                       onClick={() => handleUpvote(topic.id)}
-                      className="p-5 rounded-[2rem] bg-zinc-50 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all flex flex-col items-center gap-2 border border-zinc-100 hover:border-emerald-200 active:scale-90"
+                      className="p-3 sm:p-5 rounded-2xl sm:rounded-[2rem] bg-zinc-50 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all flex flex-row sm:flex-col items-center gap-2 border border-zinc-100 hover:border-emerald-200 active:scale-90"
                     >
-                      <ThumbsUp size={24} />
-                      <span className="text-sm font-black">{topic.upvotes}</span>
+                      <ThumbsUp size={20} className="sm:w-6 sm:h-6" />
+                      <span className="text-xs sm:text-sm font-black">{topic.upvotes}</span>
                     </button>
                   </div>
-
                   {/* Content Column */}
-                  <div className="flex-1 space-y-6">
+                  <div className="flex-1 space-y-4 sm:space-y-6">
                     <div className="flex items-center gap-4">
-                      <span className="px-4 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-emerald-100">
+                      <span className="px-3 py-1 sm:px-4 sm:py-1.5 bg-emerald-50 text-emerald-700 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-lg sm:rounded-xl border border-emerald-100">
                         {topic.category}
                       </span>
-                      <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase tracking-widest font-black">
-                        <Clock size={12} />
+                      <div className="flex items-center gap-1.5 text-[8px] sm:text-[10px] text-zinc-400 uppercase tracking-widest font-black">
+                        <Clock size={10} className="sm:w-3 sm:h-3" />
                         {formatTopicDate(topic.timestamp)}
                       </div>
                     </div>
                     
                     <Link to={`/forum/${topic.id}`} className="block group/title">
-                      <h3 className="text-3xl sm:text-4xl font-black text-zinc-900 group-hover/title:text-[#046A38] transition-colors font-display tracking-tight leading-tight">
+                      <h3 className="text-2xl sm:text-4xl font-black text-zinc-900 group-hover/title:text-[#046A38] transition-colors font-display tracking-tight leading-tight">
                         {topic.title}
                       </h3>
                     </Link>
                     
-                    <p className="text-zinc-500 line-clamp-2 font-medium text-lg leading-relaxed max-w-3xl">
+                    <p className="text-zinc-500 line-clamp-2 font-medium text-sm sm:text-lg leading-relaxed max-w-3xl">
                       {topic.content}
                     </p>
 
-                    <div className="flex items-center justify-between pt-8 border-t border-zinc-50">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-2xl bg-zinc-900 flex items-center justify-center text-white font-black text-sm shadow-lg">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 sm:pt-8 border-t border-zinc-50 gap-4">
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-zinc-900 flex items-center justify-center text-white font-black text-xs sm:text-sm shadow-lg">
                           {topic.nickname[0].toUpperCase()}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-black text-zinc-900">{topic.nickname}</span>
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Community Member</span>
+                          <span className="text-[10px] sm:text-xs font-black text-zinc-900">{topic.nickname}</span>
+                          <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Community Member</span>
                         </div>
                       </div>
                       
                       <Link 
                         to={`/forum/${topic.id}`}
-                        className="flex items-center gap-3 bg-zinc-50 hover:bg-zinc-900 hover:text-white px-6 py-3 rounded-2xl text-zinc-500 font-black text-[10px] uppercase tracking-widest transition-all group/btn"
+                        className="flex items-center justify-center gap-3 bg-zinc-50 hover:bg-zinc-900 hover:text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl text-zinc-500 font-black text-[8px] sm:text-[10px] uppercase tracking-widest transition-all group/btn"
                       >
-                        <MessageCircle size={18} className="group-hover/btn:scale-110 transition-transform" />
+                        <MessageCircle size={14} className="sm:w-[18px] sm:h-[18px] group-hover/btn:scale-110 transition-transform" />
                         {topic.replyCount} Replies
-                        <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                        <ChevronRight size={14} className="sm:w-4 sm:h-4 group-hover/btn:translate-x-1 transition-transform" />
                       </Link>
                     </div>
                   </div>
