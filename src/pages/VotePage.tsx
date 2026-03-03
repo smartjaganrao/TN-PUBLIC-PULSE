@@ -212,27 +212,41 @@ const VotePage: React.FC = () => {
             exit={{ opacity: 0, x: -20 }}
             className="space-y-8"
           >
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {parties.map((party) => (
-                <button
-                  key={party.id}
-                  onClick={() => setSelectedParty(party)}
-                  className={`relative p-6 rounded-[2rem] border-2 transition-all duration-300 group ${
-                    selectedParty?.id === party.id
-                      ? 'border-[#046A38] bg-emerald-50 shadow-2xl scale-[1.05]'
-                      : 'border-white bg-white hover:border-zinc-100 shadow-sm'
-                  }`}
-                >
-                  <div className="aspect-square w-full mb-4">
-                    <img src={party.image} alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" referrerPolicy="no-referrer" />
+            <div className="space-y-12">
+              {[
+                { id: 'RULING', label: 'Ruling Front (SPA)', color: 'text-rose-600' },
+                { id: 'OPPOSITION', label: 'Opposition Front (AIADMK/NDA)', color: 'text-emerald-600' },
+                { id: 'ALTERNATIVES', label: 'Alternatives & Others', color: 'text-amber-600' }
+              ].map((axis) => (
+                <div key={axis.id} className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`h-1 w-12 rounded-full bg-current ${axis.color}`} />
+                    <h3 className={`text-xl font-black font-display uppercase tracking-widest ${axis.color}`}>{axis.label}</h3>
                   </div>
-                  <p className="text-xs sm:text-lg font-black text-zinc-900 font-display tracking-tight">{party.name}</p>
-                  {selectedParty?.id === party.id && (
-                    <div className="absolute top-3 right-3 bg-[#046A38] text-white p-1 rounded-full shadow-lg">
-                      <Check size={12} />
-                    </div>
-                  )}
-                </button>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {parties.filter(p => p.axis === axis.id).map((party) => (
+                      <button
+                        key={party.id}
+                        onClick={() => setSelectedParty(party)}
+                        className={`relative p-6 rounded-[2rem] border-2 transition-all duration-300 group ${
+                          selectedParty?.id === party.id
+                            ? 'border-[#046A38] bg-emerald-50 shadow-2xl scale-[1.05]'
+                            : 'border-white bg-white hover:border-zinc-100 shadow-sm'
+                        }`}
+                      >
+                        <div className="aspect-square w-full mb-4">
+                          <img src={party.image} alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" referrerPolicy="no-referrer" />
+                        </div>
+                        <p className="text-xs sm:text-lg font-black text-zinc-900 font-display tracking-tight leading-none">{party.name}</p>
+                        {selectedParty?.id === party.id && (
+                          <div className="absolute top-3 right-3 bg-[#046A38] text-white p-1 rounded-full shadow-lg">
+                            <Check size={12} />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
 

@@ -4,7 +4,7 @@ import { MessageSquare, Send, User, Clock, Loader2, Heart, Reply, ChevronDown, C
 import { subscribeToComments, postComment, Comment, postCommentReply, subscribeToCommentReplies, CommentReply, likeComment, likeCommentReply } from '../services/voteService';
 import { parties } from '../data/parties';
 
-const CommentItem: React.FC<{ comment: Comment }> = ({ comment }) => {
+const CommentItem = React.forwardRef<HTMLDivElement, { comment: Comment }>(({ comment }, ref) => {
   const [showReplies, setShowReplies] = useState(false);
   const [replies, setReplies] = useState<CommentReply[]>([]);
   const [replyNickname, setReplyNickname] = useState('');
@@ -77,6 +77,7 @@ const CommentItem: React.FC<{ comment: Comment }> = ({ comment }) => {
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
@@ -254,9 +255,9 @@ const CommentItem: React.FC<{ comment: Comment }> = ({ comment }) => {
       </AnimatePresence>
     </motion.div>
   );
-};
+});
 
-const CommentSection: React.FC = () => {
+const CommentSection = React.forwardRef<HTMLDivElement>((_, ref) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [nickname, setNickname] = useState('');
   const [content, setContent] = useState('');
@@ -289,7 +290,7 @@ const CommentSection: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div ref={ref} className="space-y-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="bg-indigo-500 p-2 rounded-lg text-white shadow-lg shadow-indigo-200 animate-pulse">
           <MessageSquare size={24} />
@@ -386,6 +387,6 @@ const CommentSection: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default CommentSection;

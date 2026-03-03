@@ -17,7 +17,7 @@ import {
   Legend
 } from 'recharts';
 import { Link } from 'react-router-dom';
-import { Trophy, MapPin, Globe, Loader2, Database, Trash2, ArrowLeft, Vote, Users, ChevronRight, Share2, Twitter, Facebook, MessageCircle, RefreshCw } from 'lucide-react';
+import { Trophy, MapPin, Globe, Loader2, Database, Trash2, ArrowLeft, Vote, Users, ChevronRight, Share2, Twitter, Facebook, MessageCircle, RefreshCw, Zap, TrendingUp } from 'lucide-react';
 import { clearAllData, subscribeToOverallResults, getDistrictResults } from '../services/voteService';
 import CommentSection from '../components/CommentSection';
 import BattleArena from '../components/BattleArena';
@@ -30,7 +30,7 @@ const ResultsPage: React.FC = () => {
   const [districtData, setDistrictData] = useState<any>(null);
   const [districtLoading, setDistrictLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overall' | 'districts' | 'social'>('overall');
+  const [activeTab, setActiveTab] = useState<'overall' | 'districts' | 'axis' | 'social'>('overall');
 
   const shareUrl = window.location.origin + '/results';
   const shareMessage = "Check out the live Tamil Nadu 2026 election predictions! See who's leading district by district. 🗳️🔥";
@@ -110,6 +110,23 @@ const ResultsPage: React.FC = () => {
       .sort((a, b) => b.votes - a.votes);
   };
 
+  const formatAxisData = (data: any) => {
+    if (!data) return [];
+    const axisMap: any = {
+      'RULING': { name: 'Ruling Front', votes: 0, color: '#FF0000', description: 'DMK-led Alliance (SPA)' },
+      'OPPOSITION': { name: 'Opposition Front', votes: 0, color: '#008000', description: 'AIADMK/NDA/Others' },
+      'ALTERNATIVES': { name: 'Alternatives', votes: 0, color: '#800000', description: 'TVK, NTK, MNM & Others' }
+    };
+
+    parties.forEach(p => {
+      if (axisMap[p.axis]) {
+        axisMap[p.axis].votes += (data[p.id] || 0);
+      }
+    });
+
+    return Object.values(axisMap).sort((a: any, b: any) => b.votes - a.votes);
+  };
+
   const getLeadingParty = (data: any) => {
     if (!data) return null;
     let maxVotes = -1;
@@ -159,6 +176,7 @@ const ResultsPage: React.FC = () => {
         <div className="bg-white p-1.5 rounded-2xl border border-zinc-100 shadow-sm flex gap-1 overflow-x-auto no-scrollbar">
           {[
             { id: 'overall', label: 'Global', icon: <Globe size={14} /> },
+            { id: 'axis', label: 'Three-Axis', icon: <Database size={14} /> },
             { id: 'districts', label: 'Districts', icon: <MapPin size={14} /> },
             { id: 'social', label: 'Social', icon: <MessageCircle size={14} /> }
           ].map((tab) => (
@@ -291,6 +309,115 @@ const ResultsPage: React.FC = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
+              </div>
+
+              {/* Youth Pulse Insight */}
+              <div className="md:col-span-2 bg-gradient-to-r from-indigo-500 to-purple-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Zap size={80} />
+                </div>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[8px] font-black uppercase tracking-widest">
+                      <TrendingUp size={12} className="text-amber-300" />
+                      Youth Pulse
+                    </div>
+                    <h4 className="text-2xl font-black font-display tracking-tight">The "New Contender" Factor</h4>
+                    <p className="text-white/70 text-sm font-medium max-w-md">TVK and NTK are showing significant traction among digital-first voters. Their combined vote share is a key metric to watch.</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 text-center min-w-[150px]">
+                    <p className="text-4xl font-black font-display">
+                      {overallData ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%
+                    </p>
+                    <p className="text-[8px] font-black uppercase tracking-widest text-white/60 mt-1">Combined Share</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'axis' && (
+          <motion.div
+            key="axis"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-8"
+          >
+            <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                <div>
+                  <h3 className="text-3xl font-black font-display tracking-tight">Three-Axis Analysis</h3>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-1">Aggregated community pulse by political fronts</p>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-zinc-50 rounded-2xl border border-zinc-100">
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Total Axis Votes:</span>
+                  <span className="text-lg font-black text-zinc-900">{overallData?.totalVotes || 0}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="h-[350px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={formatAxisData(overallData)}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={80}
+                        outerRadius={120}
+                        paddingAngle={8}
+                        dataKey="votes"
+                        stroke="none"
+                      >
+                        {formatAxisData(overallData).map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '1.5rem', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '1rem' }}
+                        itemStyle={{ fontWeight: 800, fontSize: '12px' }}
+                      />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ paddingTop: '2rem', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="flex flex-col justify-center gap-6">
+                  {formatAxisData(overallData).map((axis: any, i: number) => (
+                    <div key={i} className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100 flex items-center justify-between group hover:border-zinc-200 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-3 h-12 rounded-full" style={{ backgroundColor: axis.color }} />
+                        <div>
+                          <h4 className="text-lg font-black text-zinc-900">{axis.name}</h4>
+                          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{axis.description}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-black text-zinc-900 font-display">
+                          {overallData?.totalVotes > 0 ? Math.round((axis.votes / overallData.totalVotes) * 100) : 0}%
+                        </p>
+                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{axis.votes} Votes</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-rose-50 p-8 rounded-[2.5rem] border border-rose-100">
+                <h5 className="text-[10px] font-black text-rose-600 uppercase tracking-[0.2em] mb-4">Ruling Impact</h5>
+                <p className="text-zinc-800 text-sm font-medium leading-relaxed">Measuring the "Dravidian Model" performance and anti-incumbency sentiment across the state.</p>
+              </div>
+              <div className="bg-emerald-50 p-8 rounded-[2.5rem] border border-emerald-100">
+                <h5 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4">Opposition Strength</h5>
+                <p className="text-zinc-800 text-sm font-medium leading-relaxed">Evaluating the consolidation of the opposition vote and grassroots campaign traction.</p>
+              </div>
+              <div className="bg-amber-50 p-8 rounded-[2.5rem] border border-amber-100">
+                <h5 className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-4">Alternative Rise</h5>
+                <p className="text-zinc-800 text-sm font-medium leading-relaxed">Quantifying the impact of TVK, NTK, and others among youth and first-time voters.</p>
               </div>
             </div>
           </motion.div>
