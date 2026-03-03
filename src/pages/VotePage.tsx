@@ -235,7 +235,7 @@ const VotePage: React.FC = () => {
                         }`}
                       >
                         <div className="aspect-square w-full mb-4">
-                          <img src={party.image} alt="" className="w-full h-full object-contain group-hover:scale-110 transition-transform" referrerPolicy="no-referrer" />
+                          <img src={party.image} alt={party.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform" referrerPolicy="no-referrer" />
                         </div>
                         <p className="text-xs sm:text-lg font-black text-zinc-900 font-display tracking-tight leading-none">{party.name}</p>
                         {selectedParty?.id === party.id && (

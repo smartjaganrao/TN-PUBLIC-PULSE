@@ -225,7 +225,7 @@ const ResultsPage: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-[#046A38]/40 to-transparent opacity-50" />
               {overallLeader && (
                 <div className="absolute inset-0 opacity-10">
-                  <img src={overallLeader.image} alt="" className="w-full h-full object-cover blur-md" />
+                  <img src={overallLeader.image} alt="" className="w-full h-full object-cover blur-md" aria-hidden="true" />
                 </div>
               )}
               <div className="relative z-10 space-y-6">
@@ -236,7 +236,7 @@ const ResultsPage: React.FC = () => {
                 {overallLeader ? (
                   <>
                     <div className="relative">
-                      <img src={overallLeader.image} alt="" className="w-32 h-32 rounded-full border-4 border-white/10 mx-auto shadow-2xl bg-white p-2" />
+                      <img src={overallLeader.image} alt={overallLeader.name} className="w-32 h-32 rounded-full border-4 border-white/10 mx-auto shadow-2xl bg-white p-2" />
                       <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full border-4 border-zinc-900 shadow-xl flex items-center justify-center text-white font-black text-sm" style={{ backgroundColor: overallLeader.color }}>
                         {overallLeader.name[0]}
                       </div>
