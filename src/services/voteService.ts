@@ -390,6 +390,30 @@ export const subscribeToForumTopics = (callback: (topics: ForumTopic[]) => void)
   });
 };
 
+// --- Stats & Visitors ---
+export const incrementVisitorCount = async () => {
+  const visitorRef = doc(db, 'stats', 'visitors');
+  const visitedKey = 'tn_pulse_visited';
+  
+  // Only increment once per session/device if possible, or every time if requested.
+  // Usually, a simple increment on mount is fine for "total views".
+  if (!sessionStorage.getItem(visitedKey)) {
+    await setDoc(visitorRef, { count: increment(1) }, { merge: true });
+    sessionStorage.setItem(visitedKey, 'true');
+  }
+};
+
+export const subscribeToVisitorCount = (callback: (count: number) => void) => {
+  const visitorRef = doc(db, 'stats', 'visitors');
+  return onSnapshot(visitorRef, (snapshot) => {
+    if (snapshot.exists()) {
+      callback(snapshot.data().count || 0);
+    } else {
+      callback(0);
+    }
+  });
+};
+
 // --- Admin Functions ---
 export const getAllVotes = async () => {
   const votesRef = collection(db, 'votes');

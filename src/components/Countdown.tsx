@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Vote } from 'lucide-react';
 
 const Countdown: React.FC = () => {

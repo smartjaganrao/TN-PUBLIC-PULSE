@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { motion } from 'framer-motion';
-import { Vote, BarChart3, Users, ChevronRight, AlertCircle, MessageSquare, Target, Trophy } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Vote, BarChart3, Users, ChevronRight, AlertCircle, MessageSquare, Target, Trophy, Eye } from 'lucide-react';
 import Countdown from '../components/Countdown';
-import { getOverallResults } from '../services/voteService';
+import Banner from '../components/Banner';
+import { getOverallResults, incrementVisitorCount, subscribeToVisitorCount } from '../services/voteService';
 
 const HomePage: React.FC = () => {
   const { t } = useLanguage();
   const [totalVotes, setTotalVotes] = useState<number>(0);
+  const [visitorCount, setVisitorCount] = useState<number>(0);
+
+  useEffect(() => {
+    incrementVisitorCount();
+    const unsubscribe = subscribeToVisitorCount((count) => {
+      setVisitorCount(count);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchVotes = async () => {
@@ -66,8 +76,13 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* Dynamic Banner Section - Overlapping Hero */}
+      <div className="-mt-24 relative z-30">
+        <Banner />
+      </div>
+
       {/* Bento Dashboard Grid */}
-      <div className="max-w-6xl mx-auto w-full px-4 -mt-16 relative z-20 grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="max-w-6xl mx-auto w-full px-4 relative z-20 grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Live Stats Bento */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -151,12 +166,13 @@ const HomePage: React.FC = () => {
 
       {/* Trending / Features Section - More Compact */}
       <section className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {[
             { title: "Real-time", icon: "🔥", color: "bg-orange-50" },
             { title: "Anonymous", icon: "🛡️", color: "bg-blue-50" },
             { title: "Unbiased", icon: "⚖️", color: "bg-purple-50" },
-            { title: "Viral", icon: "🚀", color: "bg-emerald-50" }
+            { title: "Viral", icon: "🚀", color: "bg-emerald-50" },
+            { title: `${visitorCount.toLocaleString()} Visitors`, icon: "👁️", color: "bg-zinc-100" }
           ].map((item, i) => (
             <div key={i} className={`${item.color} p-6 rounded-3xl flex items-center gap-4 border border-black/5 hover:scale-105 transition-transform cursor-default`}>
               <span className="text-3xl">{item.icon}</span>

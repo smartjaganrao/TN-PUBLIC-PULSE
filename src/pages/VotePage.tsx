@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { districts } from '../data/districts';
 import { parties, Party } from '../data/parties';
 import { submitVote, hasVotedLocally } from '../services/voteService';

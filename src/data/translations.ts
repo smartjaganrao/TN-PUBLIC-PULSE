@@ -28,7 +28,8 @@ export const translations = {
     whatsapp: "WhatsApp",
     selectDistrictPrompt: "Please select a district to view results",
     loading: "Loading data...",
-    noVotes: "No votes recorded yet."
+    noVotes: "No votes recorded yet.",
+    visitors: "Total Visitors"
   },
   ta: {
     title: "தமிழக மக்கள் நாடி",
@@ -59,7 +60,8 @@ export const translations = {
     whatsapp: "வாட்ஸ்அப்",
     selectDistrictPrompt: "முடிவுகளைக் காண மாவட்டத்தைத் தேர்ந்தெடுக்கவும்",
     loading: "தரவு ஏற்றப்படுகிறது...",
-    noVotes: "இதுவரை வாக்குகள் எதுவும் பதிவாகவில்லை."
+    noVotes: "இதுவரை வாக்குகள் எதுவும் பதிவாகவில்லை.",
+    visitors: "மொத்த பார்வையாளர்கள்"
   }
 };
 

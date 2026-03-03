@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Swords, Zap, Shield, Trophy, Loader2, Clock } from 'lucide-react';
 import { parties } from '../data/parties';
 import { subscribeToShouts, postShout } from '../services/voteService';
