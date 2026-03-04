@@ -1,4 +1,4 @@
-.import dmkLogo from '../assets/img/DMK.webp';
+import dmkLogo from '../assets/img/DMK.webp';
 import incLogo from '../assets/img/INC.avif';
 import vckLogo from '../assets/img/VCK.webp';
 import cpiLogo from '../assets/img/CPI.avif';
