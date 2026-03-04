@@ -1,5 +1,12 @@
+const imageModules = import.meta.glob('../assets/img/*.{webp,avif}', { eager: true, query: '?url', import: 'default' });
+
 const getPartyImage = (filename: string) => {
-  return `/img/${filename}`;
+  const path = `../assets/img/${filename}`;
+  const resolved = (imageModules[path] as string) || '';
+  if (!resolved) {
+    console.warn(`[Asset Resolution] Could not find image: ${filename} at path: ${path}`);
+  }
+  return resolved;
 };
 
 export interface Party {

@@ -37,7 +37,6 @@ const PartyImage: React.FC<PartyImageProps> = ({ src, alt, className = "", fallb
           setError(true);
           setLoading(false);
         }}
-        referrerPolicy={src.startsWith('http') ? "no-referrer" : undefined}
       />
     </div>
   );
