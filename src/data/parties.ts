@@ -1,8 +1,10 @@
-const imageModules = import.meta.glob('../assets/img/*.{webp,avif}', { eager: true, as: 'url' });
-
 const getPartyImage = (filename: string) => {
-  const path = `../assets/img/${filename}`;
-  return imageModules[path] || '';
+  try {
+    return new URL(`../assets/img/${filename}`, import.meta.url).href;
+  } catch (e) {
+    console.error(`Failed to resolve image: ${filename}`, e);
+    return '';
+  }
 };
 
 export interface Party {
