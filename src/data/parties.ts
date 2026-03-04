@@ -1,10 +1,5 @@
 const getPartyImage = (filename: string) => {
-  try {
-    return new URL(`../assets/img/${filename}`, import.meta.url).href;
-  } catch (e) {
-    console.error(`Failed to resolve image: ${filename}`, e);
-    return '';
-  }
+  return `/img/${filename}`;
 };
 
 export interface Party {
