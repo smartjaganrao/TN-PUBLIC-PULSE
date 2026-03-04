@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 
 // These values should be provided by the user in their .env file
 const firebaseConfig = {
@@ -12,6 +12,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-// Note: This will fail if config is missing, which is expected until the user configures it.
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+
+// Initialize Firestore with experimentalForceLongPolling to avoid connection issues in some environments
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+});

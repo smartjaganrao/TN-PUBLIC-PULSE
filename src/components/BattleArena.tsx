@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Swords, Zap, Shield, Trophy, Loader2, Clock } from 'lucide-react';
 import { parties } from '../data/parties';
+import PartyImage from '../components/PartyImage';
 import { subscribeToShouts, postShout } from '../services/voteService';
 import confetti from 'canvas-confetti';
 
@@ -104,7 +105,7 @@ const BattleArena: React.FC = () => {
               className="relative"
             >
               <div className="w-20 h-20 rounded-full border-4 overflow-hidden bg-white shadow-xl" style={{ borderColor: partyA.color }}>
-                <img src={partyA.image} alt={partyA.name} className="w-full h-full object-contain p-2" referrerPolicy="no-referrer" />
+                <PartyImage src={partyA.image} alt={partyA.name} className="w-full h-full p-2" fallbackText={partyA.name} />
               </div>
               <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-md">
                 <Zap className="text-yellow-500" size={14} fill="currentColor" />
@@ -166,7 +167,7 @@ const BattleArena: React.FC = () => {
               className="relative"
             >
               <div className="w-20 h-20 rounded-full border-4 overflow-hidden bg-white shadow-xl" style={{ borderColor: partyB.color }}>
-                <img src={partyB.image} alt={partyB.name} className="w-full h-full object-contain p-2" referrerPolicy="no-referrer" />
+                <PartyImage src={partyB.image} alt={partyB.name} className="w-full h-full p-2" fallbackText={partyB.name} />
               </div>
               <div className="absolute -top-1 -left-1 bg-white rounded-full p-1 shadow-md">
                 <Shield className="text-blue-500" size={14} fill="currentColor" />

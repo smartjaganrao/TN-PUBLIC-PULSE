@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Send, User, Clock, Loader2, Heart, Reply, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
 import { subscribeToComments, postComment, Comment, postCommentReply, subscribeToCommentReplies, CommentReply, likeComment, likeCommentReply } from '../services/voteService';
 import { parties } from '../data/parties';
+import PartyImage from './PartyImage';
 
 const CommentItem = React.forwardRef<HTMLDivElement, { comment: Comment }>(({ comment }, ref) => {
   const [showReplies, setShowReplies] = useState(false);
@@ -92,11 +93,10 @@ const CommentItem = React.forwardRef<HTMLDivElement, { comment: Comment }>(({ co
                 className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white overflow-hidden bg-white shadow-sm"
                 title={`Supports ${parties.find(p => p.id === comment.partyId)?.name}`}
               >
-                <img 
-                  src={parties.find(p => p.id === comment.partyId)?.image} 
+                <PartyImage 
+                  src={parties.find(p => p.id === comment.partyId)?.image || ''} 
                   alt="party" 
-                  className="w-full h-full object-contain p-0.5"
-                  referrerPolicy="no-referrer"
+                  className="w-full h-full p-0.5"
                 />
               </div>
             )}
@@ -336,7 +336,7 @@ const CommentSection = React.forwardRef<HTMLDivElement>((_, ref) => {
                           }`}
                           title={p.name}
                         >
-                          <img src={p.image} alt={p.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                          <PartyImage src={p.image} alt={p.name} className="w-full h-full" />
                         </button>
                       ))}
                     </div>

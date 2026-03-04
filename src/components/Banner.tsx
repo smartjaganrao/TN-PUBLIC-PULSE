@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { TrendingUp, ChevronRight, ChevronLeft, Vote } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { parties } from '../data/parties';
+import PartyImage from '../components/PartyImage';
 import { getOverallResults } from '../services/voteService';
 
 const Banner: React.FC = () => {
@@ -72,21 +73,20 @@ const Banner: React.FC = () => {
             className="absolute inset-0 flex items-center p-8 sm:p-12"
           >
             <div className="absolute inset-0 opacity-20">
-              <img 
+              <PartyImage 
                 src={trending[currentIndex].image} 
                 alt="" 
-                className="w-full h-full object-cover blur-xl"
-                referrerPolicy="no-referrer"
+                className="w-full h-full blur-xl"
               />
             </div>
             
             <div className="relative z-10 flex flex-col sm:flex-row items-center gap-8 w-full">
               <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white p-4 shadow-2xl flex-shrink-0">
-                <img 
+                <PartyImage 
                   src={trending[currentIndex].image} 
                   alt={trending[currentIndex].name} 
-                  className="w-full h-full object-contain"
-                  referrerPolicy="no-referrer"
+                  className="w-full h-full"
+                  fallbackText={trending[currentIndex].name}
                 />
               </div>
               

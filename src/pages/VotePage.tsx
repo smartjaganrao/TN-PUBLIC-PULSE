@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { districts } from '../data/districts';
 import { parties, Party } from '../data/parties';
+import PartyImage from '../components/PartyImage';
 import { submitVote, hasVotedLocally } from '../services/voteService';
 import { CheckCircle2, AlertCircle, Share2, Copy, Check, ArrowLeft, ArrowRight, User, Loader2, Vote, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -235,7 +236,12 @@ const VotePage: React.FC = () => {
                         }`}
                       >
                         <div className="aspect-square w-full mb-4">
-                          <img src={party.image} alt={party.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform" referrerPolicy="no-referrer" />
+                          <PartyImage 
+                            src={party.image} 
+                            alt={party.name} 
+                            className="w-full h-full" 
+                            fallbackText={party.name}
+                          />
                         </div>
                         <p className="text-xs sm:text-lg font-black text-zinc-900 font-display tracking-tight leading-none">{party.name}</p>
                         {selectedParty?.id === party.id && (
