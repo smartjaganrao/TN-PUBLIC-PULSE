@@ -224,7 +224,7 @@ const VotePage: React.FC = () => {
                     <div className={`h-1 w-12 rounded-full bg-current ${axis.color}`} />
                     <h3 className={`text-xl font-black font-display uppercase tracking-widest ${axis.color}`}>{axis.label}</h3>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
                     {parties.filter(p => p.axis === axis.id).map((party) => (
                       <button
                         key={party.id}
