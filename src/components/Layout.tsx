@@ -15,7 +15,7 @@ const Layout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#F5F5F0]">
       <Header />
-      <main className={`flex-grow ${location.pathname === '/' ? 'pt-0' : 'pt-32'}`}>
+      <main className={`flex-grow ${location.pathname === '/' ? 'pt-0' : 'pt-20 sm:pt-32'}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

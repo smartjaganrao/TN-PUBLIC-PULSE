@@ -32,20 +32,20 @@ const BlogListPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-zinc-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-full text-xs font-black uppercase tracking-widest mb-4"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest mb-4"
           >
-            <BookOpen size={14} />
+            <BookOpen size={12} className="sm:w-[14px] sm:h-[14px]" />
             Political Insights
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-6xl font-black text-zinc-900 font-display mb-6"
+            className="text-3xl sm:text-6xl font-black text-zinc-900 font-display mb-4 sm:mb-6"
           >
             Political <span className="text-indigo-600">Insights</span>
           </motion.h1>
@@ -53,7 +53,7 @@ const BlogListPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-zinc-500 max-w-2xl mx-auto text-lg"
+            className="text-zinc-500 max-w-2xl mx-auto text-sm sm:text-lg px-4"
           >
             Deep dives, expert analysis, and community stories about the 2026 Tamil Nadu Legislative Assembly elections.
           </motion.p>
@@ -71,7 +71,7 @@ const BlogListPage: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="group bg-white rounded-[2.5rem] overflow-hidden border border-zinc-100 shadow-xl shadow-zinc-200/50 hover:shadow-2xl hover:shadow-indigo-200/30 transition-all flex flex-col"
+                className="group bg-white rounded-3xl sm:rounded-[2.5rem] overflow-hidden border border-zinc-100 shadow-xl shadow-zinc-200/50 hover:shadow-2xl hover:shadow-indigo-200/30 transition-all flex flex-col"
               >
                 <Link to={`/blog/${post.slug}`} className="relative aspect-video overflow-hidden">
                   <img
@@ -80,41 +80,41 @@ const BlogListPage: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 shadow-sm">
+                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
+                    <span className="bg-white/90 backdrop-blur-md px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-indigo-600 shadow-sm">
                       {post.category}
                     </span>
                   </div>
                 </Link>
 
-                <div className="p-8 flex-1 flex flex-col">
-                  <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
+                <div className="p-6 sm:p-8 flex-1 flex flex-col">
+                  <div className="flex items-center gap-3 sm:gap-4 text-[8px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 sm:mb-4">
                     <div className="flex items-center gap-1.5">
-                      <Calendar size={12} />
+                      <Calendar size={10} className="sm:w-3 sm:h-3" />
                       {formatDate(post.timestamp)}
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <User size={12} />
+                      <User size={10} className="sm:w-3 sm:h-3" />
                       {post.author}
                     </div>
                   </div>
 
                   <Link to={`/blog/${post.slug}`}>
-                    <h2 className="text-xl font-black text-zinc-900 mb-4 group-hover:text-indigo-600 transition-colors font-display leading-tight">
+                    <h2 className="text-lg sm:text-xl font-black text-zinc-900 mb-3 sm:mb-4 group-hover:text-indigo-600 transition-colors font-display leading-tight">
                       {post.title}
                     </h2>
                   </Link>
 
-                  <p className="text-zinc-500 text-sm line-clamp-3 mb-6 flex-1">
+                  <p className="text-zinc-500 text-xs sm:text-sm line-clamp-3 mb-4 sm:mb-6 flex-1">
                     {post.excerpt}
                   </p>
 
                   <Link
                     to={`/blog/${post.slug}`}
-                    className="inline-flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-widest group/link"
+                    className="inline-flex items-center gap-2 text-indigo-600 font-black text-[10px] sm:text-xs uppercase tracking-widest group/link"
                   >
                     Read Full Story
-                    <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
+                    <ArrowRight size={12} className="sm:w-[14px] sm:h-[14px] group-hover/link:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               </motion.article>

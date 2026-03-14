@@ -294,56 +294,56 @@ const AdminPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <main className="lg:ml-64 p-4 sm:p-8 lg:p-12 space-y-8 sm:space-y-12">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 sm:gap-8">
+      <main className="lg:ml-64 p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-12">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-8">
           <div>
-            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter font-display">
+            <h1 className="text-xl sm:text-4xl font-black uppercase tracking-tighter font-display">
               {activeTab === 'votes' ? 'Voting Records' : activeTab === 'comments' ? 'Community Comments' : activeTab === 'forum' ? 'Forum Management' : 'Blog Management'}
             </h1>
-            <p className="text-zinc-500 text-[10px] sm:text-xs font-medium uppercase tracking-widest mt-1 sm:mt-2">
+            <p className="text-zinc-500 text-[9px] sm:text-xs font-medium uppercase tracking-widest mt-1 sm:mt-2">
               Viewing {filteredData.length} records from Firestore
             </p>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {activeTab === 'blog' && (
               <button 
                 onClick={() => setShowAddBlog(true)}
-                className="flex items-center gap-2 bg-[#141414] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200"
+                className="flex items-center gap-2 bg-[#141414] text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200"
               >
-                <Plus size={16} />
+                <Plus size={14} className="sm:w-4 sm:h-4" />
                 New Post
               </button>
             )}
-            <div className="relative flex-1 md:flex-none">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+            <div className="relative flex-1 min-w-[200px] md:flex-none">
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
               <input 
                 type="text" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search..."
-                className="w-full bg-white border border-[#141414]/10 rounded-xl pl-12 pr-4 py-2.5 sm:py-3 text-sm outline-none focus:ring-2 focus:ring-[#141414] transition-all md:min-w-[300px]"
+                className="w-full bg-white border border-[#141414]/10 rounded-lg sm:rounded-xl pl-10 sm:pl-12 pr-4 py-2 sm:py-3 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#141414] transition-all md:min-w-[300px]"
               />
             </div>
             <button 
               onClick={fetchData}
-              className="p-2.5 sm:p-3 bg-white border border-[#141414]/10 rounded-xl hover:bg-zinc-50 transition-all"
+              className="p-2 sm:p-3 bg-white border border-[#141414]/10 rounded-lg sm:rounded-xl hover:bg-zinc-50 transition-all"
             >
-              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
         </header>
 
         {/* Data Table */}
-        <div className="bg-white border border-[#141414]/10 rounded-[2rem] overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#141414]/10 rounded-xl sm:rounded-[2rem] overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr className="border-bottom border-[#141414]/10 bg-zinc-50/50">
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Record Details</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Metadata</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Timestamp</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right">Actions</th>
+                <tr className="border-b border-[#141414]/10 bg-zinc-50/50">
+                  <th className="px-4 sm:px-8 py-4 sm:py-6 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400">Record Details</th>
+                  <th className="px-4 sm:px-8 py-4 sm:py-6 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400">Metadata</th>
+                  <th className="px-4 sm:px-8 py-4 sm:py-6 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400">Timestamp</th>
+                  <th className="px-4 sm:px-8 py-4 sm:py-6 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -356,72 +356,72 @@ const AdminPage: React.FC = () => {
                       exit={{ opacity: 0 }}
                       className="border-b border-[#141414]/5 hover:bg-zinc-50/50 transition-all group"
                     >
-                      <td className="px-8 py-6">
+                      <td className="px-4 sm:px-8 py-4 sm:py-6">
                         {activeTab === 'votes' ? (
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3 sm:gap-4">
                             <div 
-                              className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-black text-xs"
+                              className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-white font-black text-[10px] sm:text-xs"
                               style={{ backgroundColor: parties.find(p => p.id === item.party)?.color || '#141414' }}
                             >
                               {item.party[0]}
                             </div>
                             <div>
-                              <p className="font-black text-sm">{item.nickname || 'Anonymous'}</p>
-                              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{item.party}</p>
+                              <p className="font-black text-xs sm:text-sm">{item.nickname || 'Anonymous'}</p>
+                              <p className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{item.party}</p>
                             </div>
                           </div>
                         ) : activeTab === 'comments' ? (
                           <div className="space-y-1">
-                            <p className="font-black text-sm">{item.nickname}</p>
-                            <p className="text-xs text-zinc-500 line-clamp-1">{item.content}</p>
+                            <p className="font-black text-xs sm:text-sm">{item.nickname}</p>
+                            <p className="text-[10px] sm:text-xs text-zinc-500 line-clamp-1">{item.content}</p>
                           </div>
                         ) : activeTab === 'forum' ? (
                           <div className="space-y-1">
-                            <p className="font-black text-sm">{item.title}</p>
-                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">By {item.nickname}</p>
+                            <p className="font-black text-xs sm:text-sm">{item.title}</p>
+                            <p className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest">By {item.nickname}</p>
                           </div>
                         ) : (
                           <div className="space-y-1">
-                            <p className="font-black text-sm">{item.title}</p>
-                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">By {item.author}</p>
+                            <p className="font-black text-xs sm:text-sm">{item.title}</p>
+                            <p className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest">By {item.author}</p>
                           </div>
                         )}
                       </td>
-                      <td className="px-8 py-6">
+                      <td className="px-4 sm:px-8 py-4 sm:py-6">
                         {activeTab === 'votes' ? (
-                          <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
-                            <MapPin size={12} />
+                          <div className="flex items-center gap-2 text-[10px] sm:text-xs font-medium text-zinc-500">
+                            <MapPin size={10} className="sm:w-3 sm:h-3" />
                             {item.district}
                           </div>
                         ) : activeTab === 'comments' ? (
-                          <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
-                            <User size={12} />
+                          <div className="flex items-center gap-2 text-[10px] sm:text-xs font-medium text-zinc-500">
+                            <User size={10} className="sm:w-3 sm:h-3" />
                             {item.partyId || 'No Party'}
                           </div>
                         ) : activeTab === 'forum' ? (
-                          <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
-                            <FileText size={12} />
+                          <div className="flex items-center gap-2 text-[10px] sm:text-xs font-medium text-zinc-500">
+                            <FileText size={10} className="sm:w-3 sm:h-3" />
                             {item.category}
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
-                            <BookOpen size={12} />
+                          <div className="flex items-center gap-2 text-[10px] sm:text-xs font-medium text-zinc-500">
+                            <BookOpen size={10} className="sm:w-3 sm:h-3" />
                             {item.category}
                           </div>
                         )}
                       </td>
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
-                          <Clock size={12} />
+                      <td className="px-4 sm:px-8 py-4 sm:py-6">
+                        <div className="flex items-center gap-2 text-[10px] sm:text-xs font-medium text-zinc-500">
+                          <Clock size={10} className="sm:w-3 sm:h-3" />
                           {formatTime(item.timestamp)}
                         </div>
                       </td>
-                      <td className="px-8 py-6 text-right">
+                      <td className="px-4 sm:px-8 py-4 sm:py-6 text-right">
                         <button 
                           onClick={() => handleDelete(item.id)}
-                          className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                          className="p-2 sm:p-3 text-rose-500 hover:bg-rose-50 rounded-lg sm:rounded-xl transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={14} className="sm:w-4 sm:h-4" />
                         </button>
                       </td>
                     </motion.tr>
@@ -432,11 +432,11 @@ const AdminPage: React.FC = () => {
           </div>
           
           {filteredData.length === 0 && !loading && (
-            <div className="p-20 text-center space-y-4">
-              <div className="w-16 h-16 bg-zinc-50 rounded-2xl flex items-center justify-center mx-auto text-zinc-300">
-                <Search size={32} />
+            <div className="p-12 sm:p-20 text-center space-y-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-zinc-50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto text-zinc-300">
+                <Search size={24} className="sm:w-8 sm:h-8" />
               </div>
-              <p className="text-zinc-400 font-black uppercase tracking-widest text-xs">No records found matching your search.</p>
+              <p className="text-zinc-400 font-black uppercase tracking-widest text-[10px] sm:text-xs">No records found matching your search.</p>
             </div>
           )}
         </div>
@@ -457,92 +457,92 @@ const AdminPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-4xl bg-white rounded-2xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+              <div className="p-6 sm:p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
                 <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tighter font-display">Create New Blog Post</h2>
-                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">Publish political analysis to the public pulse</p>
+                  <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter font-display">Create New Blog Post</h2>
+                  <p className="text-zinc-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1">Publish political analysis to the public pulse</p>
                 </div>
                 <button 
                   onClick={() => setShowAddBlog(false)}
-                  className="p-3 bg-white border border-zinc-200 rounded-2xl text-zinc-400 hover:text-rose-500 transition-all"
+                  className="p-2 sm:p-3 bg-white border border-zinc-200 rounded-xl sm:rounded-2xl text-zinc-400 hover:text-rose-500 transition-all"
                 >
-                  <X size={20} />
+                  <X size={18} className="sm:w-5 sm:h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleAddBlog} className="p-8 overflow-y-auto space-y-8">
+              <form onSubmit={handleAddBlog} className="p-6 sm:p-8 overflow-y-auto space-y-6 sm:space-y-8">
                 {/* Metadata Section */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Post Title</label>
+                    <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Post Title</label>
                     <div className="relative">
-                      <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                      <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4 sm:w-4 sm:h-4" />
                       <input 
                         type="text" 
                         value={blogTitle}
                         onChange={(e) => setBlogTitle(e.target.value)}
-                        className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
+                        className="w-full bg-zinc-50 border border-zinc-200 rounded-xl sm:rounded-2xl pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
                         placeholder="Election Predictions 2026"
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">URL Slug (SEO)</label>
+                    <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">URL Slug (SEO)</label>
                     <input 
                       type="text" 
                       value={blogSlug}
                       onChange={(e) => setBlogSlug(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-6 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
                       placeholder="election-predictions-2026"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Image URL</label>
+                    <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Image URL</label>
                     <div className="relative">
-                      <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                      <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4 sm:w-4 sm:h-4" />
                       <input 
                         type="text" 
                         value={blogImageUrl}
                         onChange={(e) => setBlogImageUrl(e.target.value)}
-                        className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
+                        className="w-full bg-zinc-50 border border-zinc-200 rounded-xl sm:rounded-2xl pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
                         placeholder="https://images.unsplash.com/..."
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Author</label>
+                    <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Author</label>
                     <input 
                       type="text" 
                       value={blogAuthor}
                       onChange={(e) => setBlogAuthor(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-6 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
                       placeholder="Admin"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Category</label>
+                    <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Category</label>
                     <input 
                       type="text" 
                       value={blogCategory}
                       onChange={(e) => setBlogCategory(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-6 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
                       placeholder="Analysis"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Excerpt (Brief Summary)</label>
+                    <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Excerpt (Brief Summary)</label>
                     <input 
                       type="text"
                       value={blogExcerpt}
                       onChange={(e) => setBlogExcerpt(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-6 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold outline-none focus:ring-2 focus:ring-[#141414] transition-all"
                       placeholder="A short summary of the post..."
                       required
                     />
@@ -552,26 +552,26 @@ const AdminPage: React.FC = () => {
                 {/* Content Editor Section */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Content (Markdown Supported)</label>
-                    <div className="flex bg-zinc-100 p-1 rounded-xl">
+                    <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Content (Markdown Supported)</label>
+                    <div className="flex bg-zinc-100 p-1 rounded-lg sm:rounded-xl">
                       <button
                         type="button"
                         onClick={() => setBlogEditorTab('write')}
-                        className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${blogEditorTab === 'write' ? 'bg-white text-[#141414] shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
+                        className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${blogEditorTab === 'write' ? 'bg-white text-[#141414] shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
                       >
                         Write
                       </button>
                       <button
                         type="button"
                         onClick={() => setBlogEditorTab('preview')}
-                        className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${blogEditorTab === 'preview' ? 'bg-white text-[#141414] shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
+                        className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${blogEditorTab === 'preview' ? 'bg-white text-[#141414] shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
                       >
                         Preview
                       </button>
                     </div>
                   </div>
 
-                  <div className="min-h-[400px] bg-zinc-50 rounded-[2rem] border border-zinc-200 overflow-hidden flex flex-col">
+                  <div className="min-h-[300px] sm:min-h-[400px] bg-zinc-50 rounded-xl sm:rounded-[2rem] border border-zinc-200 overflow-hidden flex flex-col">
                     {blogEditorTab === 'write' ? (
                       <div className="flex-1 bg-white quill-editor-container">
                         <ReactQuill 
@@ -592,25 +592,25 @@ const AdminPage: React.FC = () => {
                         />
                       </div>
                     ) : (
-                      <div className="w-full flex-1 bg-white px-8 py-6 overflow-y-auto prose prose-zinc prose-sm max-w-none">
+                      <div className="w-full flex-1 bg-white px-4 sm:px-8 py-4 sm:py-6 overflow-y-auto prose prose-zinc prose-sm max-w-none">
                         <div dangerouslySetInnerHTML={{ __html: blogContent || '*No content to preview*' }} />
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4">
                   <button 
                     type="button"
                     onClick={() => setShowAddBlog(false)}
-                    className="px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600 transition-all"
+                    className="order-2 sm:order-1 px-8 py-3 sm:py-4 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600 transition-all"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
                     disabled={submittingBlog}
-                    className="bg-[#141414] text-white px-12 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-200 disabled:opacity-50"
+                    className="order-1 sm:order-2 bg-[#141414] text-white px-8 sm:px-12 py-3 sm:py-4 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-200 disabled:opacity-50"
                   >
                     {submittingBlog ? 'Publishing...' : 'Publish Post'}
                   </button>

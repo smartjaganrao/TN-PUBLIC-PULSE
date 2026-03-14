@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { districts } from '../data/districts';
 import { parties, Party } from '../data/parties';
 import PartyImage from '../components/PartyImage';
-import { submitVote, hasVotedLocally } from '../services/voteService';
+import { submitVote, hasVotedForPartyLocally, getVotedPartiesLocally } from '../services/voteService';
 import { CheckCircle2, AlertCircle, Share2, Copy, Check, ArrowLeft, ArrowRight, User, Loader2, Vote, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -16,30 +16,39 @@ const VotePage: React.FC = () => {
   const [nickname, setNickname] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedParty, setSelectedParty] = useState<Party | null>(null);
+  const [selectedAlliance, setSelectedAlliance] = useState('RULING');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1);
-  const [copied, setCopied] = useState(false);
+  const [votedParties, setVotedParties] = useState<string[]>([]);
 
   useEffect(() => {
-    if (hasVotedLocally()) {
-      setError(t.alreadyVoted);
-    }
-  }, [t.alreadyVoted]);
+    setVotedParties(getVotedPartiesLocally());
+  }, []);
+
+  const [districtSearch, setDistrictSearch] = useState('');
+  const filteredDistricts = districts.filter(d => 
+    d.toLowerCase().includes(districtSearch.toLowerCase())
+  ).slice(0, 8);
 
   const handleVote = async () => {
-    if (!selectedDistrict || !selectedParty) return;
+    if (!selectedDistrict || !selectedParty) {
+      setError('Please select both a district and a party.');
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
 
     try {
       await submitVote({
-        nickname: nickname.trim() || undefined,
+        nickname: nickname.trim() || null,
         district: selectedDistrict,
         party: selectedParty.id
       });
+      
+      setVotedParties(prev => [...prev, selectedParty.id]);
       
       confetti({
         particleCount: 150,
@@ -50,8 +59,8 @@ const VotePage: React.FC = () => {
       
       setShowSuccess(true);
     } catch (err: any) {
-      if (err.message === 'ALREADY_VOTED') {
-        setError(t.alreadyVoted);
+      if (err.message === 'ALREADY_VOTED_FOR_PARTY') {
+        setError("You have already voted for this party!");
       } else {
         setError('Something went wrong. Please try again later.');
         console.error(err);
@@ -66,46 +75,56 @@ const VotePage: React.FC = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(window.location.origin);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   if (showSuccess) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-white rounded-[2rem] p-10 shadow-xl border border-zinc-100"
+          className="bg-zinc-900 text-white rounded-[3rem] p-10 sm:p-16 shadow-2xl relative overflow-hidden"
         >
-          <div className="bg-emerald-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-            <CheckCircle2 size={56} className="text-[#046A38] animate-bounce" />
-          </div>
-          <h2 className="text-4xl font-black mb-4 font-display">{t.voteSuccess}</h2>
-          <p className="text-zinc-500 mb-8">{t.shareMessage}</p>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[100px] -mr-32 -mt-32" />
           
-          <div className="flex flex-col gap-4">
-            <button
-              onClick={shareResults}
-              className="bg-[#25D366] text-white py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
-            >
-              <Share2 size={20} />
-              {t.whatsapp}
-            </button>
-            <button
-              onClick={copyLink}
-              className="bg-zinc-100 text-zinc-700 py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-zinc-200 transition-colors"
-            >
-              {copied ? <Check size={20} /> : <Copy size={20} />}
-              {copied ? 'Copied!' : t.copyLink}
-            </button>
+          <div className="relative z-10">
+            <div className="bg-emerald-500 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(16,185,129,0.4)]">
+              <CheckCircle2 size={56} className="text-white animate-bounce" />
+            </div>
+            <h2 className="text-4xl sm:text-6xl font-black mb-4 font-display tracking-tighter">VOTE RECORDED!</h2>
+            <p className="text-emerald-400 font-black uppercase tracking-[0.3em] text-[10px] mb-8">You are now part of the revolution</p>
+            
+            <div className="bg-white/5 backdrop-blur-md rounded-3xl p-8 mb-10 border border-white/10">
+              <p className="text-zinc-400 text-sm sm:text-lg font-medium mb-6">
+                "The power of youth is the common wealth for the entire world."
+              </p>
+              <h4 className="text-xl font-black font-display mb-2">WANT TO SEE THE FULL TRENDS?</h4>
+              <p className="text-zinc-500 text-xs sm:text-sm font-medium">Share this with 3 friends to help make the pulse more accurate!</p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                onClick={shareResults}
+                className="bg-[#25D366] text-white py-5 rounded-full font-black text-lg flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-xl shadow-green-500/20"
+              >
+                <Share2 size={24} />
+                Share on WhatsApp
+              </button>
+              <button
+                onClick={() => {
+                  setShowSuccess(false);
+                  setSelectedParty(null);
+                }}
+                className="bg-white/10 text-white py-5 rounded-full font-black text-lg flex items-center justify-center gap-3 hover:bg-white/20 transition-all border border-white/10"
+              >
+                <Vote size={24} />
+                Vote for Another
+              </button>
+            </div>
+
             <button
               onClick={() => navigate('/results')}
-              className="text-[#046A38] font-bold py-2 mt-4"
+              className="mt-12 text-zinc-500 hover:text-white font-black text-xs uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2 mx-auto group"
             >
-              {t.viewResults}
+              Skip to Results <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
             </button>
           </div>
         </motion.div>
@@ -114,167 +133,180 @@ const VotePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-      {/* Compact Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <Link to="/" className="text-zinc-400 hover:text-zinc-800 font-black text-[10px] flex items-center gap-2 transition-all uppercase tracking-widest">
-            <ArrowLeft size={12} />
-            Back
-          </Link>
-          <h2 className="text-3xl sm:text-4xl font-black text-zinc-900 font-display tracking-tight">Share Your Voice</h2>
-        </div>
-        
-        {/* Step Indicator */}
-        <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
-          {[1, 2].map((s) => (
-            <div 
-              key={s}
-              className={`h-2 w-12 rounded-full transition-all duration-500 ${
-                step >= s ? 'bg-[#046A38] shadow-lg shadow-emerald-100' : 'bg-zinc-100'
-              }`}
-            />
-          ))}
-          <span className="ml-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Step {step}/2</span>
-        </div>
+    <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8">
+      <div className="mb-6 text-center">
+        <h2 className="text-4xl sm:text-6xl font-black text-zinc-900 font-display tracking-tighter mb-2">
+          SHARE YOUR <span className="text-[#046A38]">VOICE</span>
+        </h2>
+        <p className="text-zinc-500 font-bold text-sm sm:text-base uppercase tracking-widest">One step. One vote. Total impact.</p>
       </div>
 
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-rose-50 border border-rose-100 text-rose-700 p-4 rounded-2xl mb-8 flex items-center gap-3 shadow-sm"
+          className="bg-rose-50 border border-rose-100 text-rose-700 p-6 rounded-3xl mb-12 flex items-center gap-4 shadow-sm max-w-2xl mx-auto"
         >
-          <AlertCircle size={18} />
-          <p className="text-xs font-bold">{error}</p>
+          <AlertCircle size={24} />
+          <p className="font-bold">{error}</p>
         </motion.div>
       )}
 
-      <AnimatePresence mode="wait">
-        {step === 1 ? (
-          <motion.div
-            key="step1"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="space-y-8"
-          >
-            <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
-                    {t.nickname}
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <input
-                      type="text"
-                      value={nickname}
-                      onChange={(e) => setNickname(e.target.value)}
-                      placeholder="e.g. Tamilan"
-                      className="w-full bg-zinc-50 border border-zinc-100 rounded-xl pl-12 pr-4 py-4 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all font-bold shadow-inner"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 font-display">
-                    {t.selectDistrict} *
-                  </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <select
-                      value={selectedDistrict}
-                      onChange={(e) => setSelectedDistrict(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-100 rounded-xl pl-12 pr-4 py-4 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all appearance-none font-bold shadow-inner"
-                    >
-                      <option value="">-- Select --</option>
-                      {districts.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setStep(2)}
-                disabled={!selectedDistrict}
-                className="w-full bg-zinc-900 text-white py-5 rounded-full font-black text-lg shadow-xl hover:bg-zinc-800 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group"
-              >
-                Next Step
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column: Identity & District */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white p-6 rounded-[2.5rem] border border-zinc-100 shadow-xl space-y-6">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 font-display flex items-center gap-2">
+                <User size={14} /> {t.nickname}
+              </label>
+              <input
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="e.g. YoungTamilan"
+                className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-4 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all font-black text-base shadow-inner"
+              />
             </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="step2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-8"
-          >
-            <div className="space-y-12">
-              {[
-                { id: 'RULING', label: 'Ruling Front (SPA)', color: 'text-rose-600' },
-                { id: 'OPPOSITION', label: 'Opposition Front (AIADMK/NDA)', color: 'text-emerald-600' },
-                { id: 'ALTERNATIVES', label: 'Alternatives & Others', color: 'text-amber-600' }
-              ].map((axis) => (
-                <div key={axis.id} className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`h-1 w-12 rounded-full bg-current ${axis.color}`} />
-                    <h3 className={`text-xl font-black font-display uppercase tracking-widest ${axis.color}`}>{axis.label}</h3>
-                  </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                    {parties.filter(p => p.axis === axis.id).map((party) => (
-                      <button
-                        key={party.id}
-                        onClick={() => setSelectedParty(party)}
-                        className={`relative p-6 rounded-[2rem] border-2 transition-all duration-300 group ${
-                          selectedParty?.id === party.id
-                            ? 'border-[#046A38] bg-emerald-50 shadow-2xl scale-[1.05]'
-                            : 'border-white bg-white hover:border-zinc-100 shadow-sm'
-                        }`}
-                      >
-                        <div className="aspect-square w-full mb-4">
-                          <PartyImage 
-                            src={party.image} 
-                            alt={party.name} 
-                            className="w-full h-full" 
-                            fallbackText={party.name}
-                          />
-                        </div>
-                        <p className="text-xs sm:text-lg font-black text-zinc-900 font-display tracking-tight leading-none">{party.name}</p>
-                        {selectedParty?.id === party.id && (
-                          <div className="absolute top-3 right-3 bg-[#046A38] text-white p-1 rounded-full shadow-lg">
-                            <Check size={12} />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 font-display flex items-center gap-2">
+                <MapPin size={14} /> {t.selectDistrict}
+              </label>
+              <input
+                type="text"
+                value={districtSearch}
+                onChange={(e) => setDistrictSearch(e.target.value)}
+                placeholder="Search district..."
+                className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-3 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all font-bold text-sm shadow-inner mb-2"
+              />
+              <div className="flex flex-wrap gap-1.5">
+                {(districtSearch ? filteredDistricts : districts.slice(0, 8)).map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setSelectedDistrict(d)}
+                    className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                      selectedDistrict === d
+                        ? 'bg-[#046A38] text-white shadow-lg scale-105'
+                        : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+              {selectedDistrict && (
+                <div className="mt-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                  <span className="text-[#046A38] font-black text-xs uppercase tracking-widest">Selected: {selectedDistrict}</span>
+                  <button onClick={() => setSelectedDistrict('')} className="text-[#046A38] hover:scale-110 transition-transform">
+                    <CheckCircle2 size={16} />
+                  </button>
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Submit Button for Desktop */}
+          <div className="hidden lg:block">
+            <button
+              onClick={handleVote}
+              disabled={!selectedParty || !selectedDistrict || isSubmitting}
+              className="w-full bg-[#046A38] text-white py-8 rounded-[2.5rem] font-black text-2xl shadow-[0_20px_50px_rgba(16,185,129,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex flex-col items-center justify-center gap-2 group"
+            >
+              {isSubmitting ? (
+                <Loader2 className="animate-spin" size={32} />
+              ) : (
+                <>
+                  <Vote size={32} className="group-hover:rotate-12 transition-transform" />
+                  <span>{t.confirmVote}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Party Selection */}
+        <div className="lg:col-span-8 space-y-6">
+          <div className="bg-white p-6 sm:p-8 rounded-[3rem] border border-zinc-100 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32" />
+            
+            {/* Alliance Tabs */}
+            <div className="relative z-10 flex p-1 bg-zinc-100 rounded-2xl mb-8">
+              {[
+                { id: 'RULING', label: 'Ruling', color: 'bg-rose-500' },
+                { id: 'OPPOSITION', label: 'Opposition', color: 'bg-emerald-500' },
+                { id: 'ALTERNATIVES', label: 'Others', color: 'bg-amber-500' }
+              ].map((alliance) => (
+                <button
+                  key={alliance.id}
+                  onClick={() => setSelectedAlliance(alliance.id)}
+                  className={`flex-1 py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                    selectedAlliance === alliance.id
+                      ? 'bg-white text-zinc-900 shadow-md'
+                      : 'text-zinc-400 hover:text-zinc-600'
+                  }`}
+                >
+                  {alliance.label}
+                </button>
               ))}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => setStep(1)}
-                className="flex-1 bg-white border border-zinc-200 text-zinc-900 py-5 rounded-full font-black text-lg hover:bg-zinc-50 transition-all"
-              >
-                Back
-              </button>
-              <button
-                onClick={handleVote}
-                disabled={!selectedParty || isSubmitting}
-                className="flex-[2] bg-[#046A38] text-white py-5 rounded-full font-black text-xl shadow-2xl shadow-emerald-200 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
-              >
-                {isSubmitting ? <Loader2 className="animate-spin" /> : <Vote />}
-                {t.confirmVote}
-              </button>
+            <div className="relative z-10">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                {parties.filter(p => p.axis === selectedAlliance).map((party) => {
+                  const alreadyVoted = votedParties.includes(party.id);
+                  return (
+                    <button
+                      key={party.id}
+                      onClick={() => !alreadyVoted && setSelectedParty(party)}
+                      disabled={alreadyVoted}
+                      className={`relative p-3 rounded-2xl border-2 transition-all duration-300 group ${
+                        selectedParty?.id === party.id
+                          ? 'border-[#046A38] bg-emerald-50 shadow-lg scale-105'
+                          : alreadyVoted
+                          ? 'border-zinc-200 bg-zinc-100 opacity-60 cursor-not-allowed'
+                          : 'border-transparent bg-zinc-50 hover:border-zinc-200'
+                      }`}
+                    >
+                      <div className="aspect-square w-full mb-2">
+                        <PartyImage 
+                          src={party.image} 
+                          alt={party.name} 
+                          className={`w-full h-full ${alreadyVoted ? 'grayscale' : ''}`} 
+                          fallbackText={party.name}
+                        />
+                      </div>
+                      <p className="text-[8px] sm:text-[10px] font-black text-zinc-900 font-display tracking-tight leading-none truncate">{party.name}</p>
+                      {selectedParty?.id === party.id && (
+                        <div className="absolute -top-1 -right-1 bg-[#046A38] text-white p-1 rounded-full shadow-lg">
+                          <Check size={10} />
+                        </div>
+                      )}
+                      {alreadyVoted && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/10 rounded-2xl">
+                          <span className="bg-zinc-900 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest">Voted</span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+
+          {/* Submit Button for Mobile */}
+          <div className="lg:hidden">
+            <button
+              onClick={handleVote}
+              disabled={!selectedParty || !selectedDistrict || isSubmitting}
+              className="w-full bg-[#046A38] text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+            >
+              {isSubmitting ? <Loader2 className="animate-spin" /> : <Vote />}
+              {t.confirmVote}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -20,7 +20,7 @@ import {
 import { db } from './firebase';
 
 export interface VoteData {
-  nickname?: string;
+  nickname?: string | null;
   district: string;
   party: string;
 }
@@ -80,6 +80,8 @@ export interface BlogPost {
 const DEVICE_ID_KEY = 'tn_2026_device_id';
 const VOTE_FLAG_KEY = 'tn_2026_voted';
 
+const VOTE_HISTORY_KEY = 'tn_2026_voted_parties';
+
 export const getDeviceId = () => {
   let id = localStorage.getItem(DEVICE_ID_KEY);
   if (!id) {
@@ -89,21 +91,26 @@ export const getDeviceId = () => {
   return id;
 };
 
-export const hasVotedLocally = () => {
-  return localStorage.getItem(VOTE_FLAG_KEY) === 'true';
+export const getVotedPartiesLocally = (): string[] => {
+  const history = localStorage.getItem(VOTE_HISTORY_KEY);
+  return history ? JSON.parse(history) : [];
+};
+
+export const hasVotedForPartyLocally = (partyId: string) => {
+  return getVotedPartiesLocally().includes(partyId);
 };
 
 // --- Votes ---
 export const submitVote = async (data: VoteData) => {
   const deviceId = getDeviceId();
   
-  // Check if already voted in Firestore (optional but good for security)
+  // Check if already voted for THIS specific party in Firestore
   const votesRef = collection(db, 'votes');
-  const q = query(votesRef, where('deviceId', '==', deviceId));
+  const q = query(votesRef, where('deviceId', '==', deviceId), where('party', '==', data.party));
   const querySnapshot = await getDocs(q);
   
   if (!querySnapshot.empty) {
-    throw new Error('ALREADY_VOTED');
+    throw new Error('ALREADY_VOTED_FOR_PARTY');
   }
 
   await addDoc(votesRef, {
@@ -112,7 +119,11 @@ export const submitVote = async (data: VoteData) => {
     timestamp: serverTimestamp()
   });
 
-  localStorage.setItem(VOTE_FLAG_KEY, 'true');
+  const votedParties = getVotedPartiesLocally();
+  if (!votedParties.includes(data.party)) {
+    votedParties.push(data.party);
+    localStorage.setItem(VOTE_HISTORY_KEY, JSON.stringify(votedParties));
+  }
 };
 
 export const getOverallResults = async () => {

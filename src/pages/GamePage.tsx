@@ -168,7 +168,7 @@ const GamePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E4E3E0] pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-[#E4E3E0] pt-24 sm:pt-32 pb-12 sm:pb-20 px-4">
       <div className="max-w-3xl mx-auto">
         <AnimatePresence mode="wait">
           {gameState === 'start' && (
@@ -177,39 +177,39 @@ const GamePage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-white rounded-[3rem] p-10 sm:p-16 text-center shadow-2xl space-y-10 border border-[#141414]/5"
+              className="bg-white rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-16 text-center shadow-2xl space-y-8 sm:space-y-10 border border-[#141414]/5"
             >
-              <div className="w-24 h-24 bg-[#046A38] rounded-[2rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-emerald-100">
-                <Target size={48} />
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#046A38] rounded-2xl sm:rounded-[2rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-emerald-100">
+                <Target size={40} className="sm:w-12 sm:h-12" />
               </div>
               <div className="space-y-4">
-                <h1 className="text-5xl sm:text-6xl font-black text-zinc-900 font-display tracking-tighter leading-none">
+                <h1 className="text-4xl sm:text-6xl font-black text-zinc-900 font-display tracking-tighter leading-none">
                   Political <span className="text-[#046A38]">IQ Quiz</span>
                 </h1>
-                <p className="text-zinc-500 text-lg font-medium max-w-md mx-auto">
+                <p className="text-zinc-500 text-base sm:text-lg font-medium max-w-md mx-auto">
                   Test your knowledge of Tamil Nadu's political history and current affairs. Earn your rank and share it with the community!
                 </p>
               </div>
-              <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-                <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                  <p className="text-2xl font-black text-zinc-900">10</p>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Questions</p>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-sm mx-auto">
+                <div className="p-3 sm:p-4 bg-zinc-50 rounded-xl sm:rounded-2xl border border-zinc-100">
+                  <p className="text-xl sm:text-2xl font-black text-zinc-900">10</p>
+                  <p className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-zinc-400">Questions</p>
                 </div>
-                <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                  <p className="text-2xl font-black text-zinc-900">15s</p>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Per Qn</p>
+                <div className="p-3 sm:p-4 bg-zinc-50 rounded-xl sm:rounded-2xl border border-zinc-100">
+                  <p className="text-xl sm:text-2xl font-black text-zinc-900">15s</p>
+                  <p className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-zinc-400">Per Qn</p>
                 </div>
-                <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                  <p className="text-2xl font-black text-zinc-900">Rank</p>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Rewards</p>
+                <div className="p-3 sm:p-4 bg-zinc-50 rounded-xl sm:rounded-2xl border border-zinc-100">
+                  <p className="text-xl sm:text-2xl font-black text-zinc-900">Rank</p>
+                  <p className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-zinc-400">Rewards</p>
                 </div>
               </div>
               <button 
                 onClick={startGame}
-                className="w-full bg-zinc-900 text-white py-6 rounded-full font-black text-xl shadow-2xl hover:bg-zinc-800 transition-all active:scale-95 flex items-center justify-center gap-3"
+                className="w-full bg-zinc-900 text-white py-5 sm:py-6 rounded-full font-black text-lg sm:text-xl shadow-2xl hover:bg-zinc-800 transition-all active:scale-95 flex items-center justify-center gap-3"
               >
                 Start Challenge
-                <ChevronRight size={24} />
+                <ChevronRight size={20} className="sm:w-6 sm:h-6" />
               </button>
               <Link to="/" className="block text-zinc-400 font-black text-[10px] uppercase tracking-widest hover:text-zinc-900 transition-colors">
                 Back to Home
@@ -247,12 +247,12 @@ const GamePage: React.FC = () => {
               </div>
 
               {/* Question Card */}
-              <div className="bg-white rounded-[3rem] p-8 sm:p-12 shadow-2xl border border-[#141414]/5 space-y-10">
-                <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 font-display leading-tight">
+              <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-12 shadow-2xl border border-[#141414]/5 space-y-8 sm:space-y-10">
+                <h2 className="text-xl sm:text-3xl font-black text-zinc-900 font-display leading-tight">
                   {questions[currentQuestionIndex].question}
                 </h2>
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4">
                   {questions[currentQuestionIndex].options.map((option, idx) => {
                     const isCorrect = idx === questions[currentQuestionIndex].correctAnswer;
                     const isSelected = idx === selectedOption;
@@ -269,11 +269,11 @@ const GamePage: React.FC = () => {
                         key={idx}
                         onClick={() => handleAnswer(idx)}
                         disabled={isAnswered}
-                        className={`w-full p-6 rounded-2xl border-2 text-left font-black text-lg transition-all flex items-center justify-between group ${buttonClass}`}
+                        className={`w-full p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 text-left font-black text-base sm:text-lg transition-all flex items-center justify-between group ${buttonClass}`}
                       >
                         <span>{option}</span>
-                        {isAnswered && isCorrect && <CheckCircle2 size={24} className="text-emerald-500" />}
-                        {isAnswered && isSelected && !isCorrect && <XCircle size={24} className="text-rose-500" />}
+                        {isAnswered && isCorrect && <CheckCircle2 size={20} className="text-emerald-500 sm:w-6 sm:h-6" />}
+                        {isAnswered && isSelected && !isCorrect && <XCircle size={20} className="text-rose-500 sm:w-6 sm:h-6" />}
                       </button>
                     );
                   })}
@@ -284,20 +284,20 @@ const GamePage: React.FC = () => {
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
-                      className="pt-8 border-t border-zinc-100 space-y-6"
+                      className="pt-6 sm:pt-8 border-t border-zinc-100 space-y-4 sm:space-y-6"
                     >
-                      <div className="bg-zinc-50 p-6 rounded-2xl">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">Did you know?</p>
-                        <p className="text-zinc-600 font-medium leading-relaxed">
+                      <div className="bg-zinc-50 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">Did you know?</p>
+                        <p className="text-zinc-600 text-sm sm:text-base font-medium leading-relaxed">
                           {questions[currentQuestionIndex].explanation}
                         </p>
                       </div>
                       <button
                         onClick={nextQuestion}
-                        className="w-full bg-[#046A38] text-white py-5 rounded-full font-black text-lg shadow-xl hover:bg-[#03552d] transition-all flex items-center justify-center gap-3"
+                        className="w-full bg-[#046A38] text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg shadow-xl hover:bg-[#03552d] transition-all flex items-center justify-center gap-3"
                       >
                         {currentQuestionIndex === questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                        <ChevronRight size={20} />
+                        <ChevronRight size={18} className="sm:w-5 sm:h-5" />
                       </button>
                     </motion.div>
                   )}
@@ -311,48 +311,50 @@ const GamePage: React.FC = () => {
               key="finished"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-[4rem] p-10 sm:p-16 text-center shadow-2xl space-y-12 border border-[#141414]/5 relative overflow-hidden"
+              className="bg-white rounded-[2.5rem] sm:rounded-[4rem] p-8 sm:p-16 text-center shadow-2xl space-y-8 sm:space-y-12 border border-[#141414]/5 relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
+              <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none hidden sm:block">
                 <Trophy size={200} />
               </div>
 
               <div className="space-y-6 relative z-10">
-                <div className={`w-24 h-24 bg-zinc-50 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner mb-8 ${getRank().color}`}>
-                  {getRank().icon}
+                <div className={`w-20 h-20 sm:w-24 sm:h-24 bg-zinc-50 rounded-2xl sm:rounded-[2rem] flex items-center justify-center mx-auto shadow-inner mb-4 sm:mb-8 ${getRank().color}`}>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                    {getRank().icon}
+                  </div>
                 </div>
-                <h2 className="text-4xl font-black text-zinc-400 uppercase tracking-[0.3em] font-display">Quiz Complete</h2>
+                <h2 className="text-2xl sm:text-4xl font-black text-zinc-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-display">Quiz Complete</h2>
                 <div className="space-y-2">
-                  <p className="text-8xl font-black text-zinc-900 tracking-tighter font-display leading-none">{score}<span className="text-zinc-300">/10</span></p>
-                  <p className={`text-2xl font-black uppercase tracking-widest ${getRank().color}`}>{getRank().title}</p>
+                  <p className="text-6xl sm:text-8xl font-black text-zinc-900 tracking-tighter font-display leading-none">{score}<span className="text-zinc-300">/10</span></p>
+                  <p className={`text-xl sm:text-2xl font-black uppercase tracking-widest ${getRank().color}`}>{getRank().title}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 relative z-10">
                 <button
                   onClick={shareScore}
-                  className="bg-[#25D366] text-white py-5 rounded-full font-black text-lg flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl shadow-green-100"
+                  className="bg-[#25D366] text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl shadow-green-100"
                 >
-                  <MessageCircle size={24} />
+                  <MessageCircle size={20} className="sm:w-6 sm:h-6" />
                   Share on WhatsApp
                 </button>
                 <button
                   onClick={startGame}
-                  className="bg-zinc-900 text-white py-5 rounded-full font-black text-lg flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-100"
+                  className="bg-zinc-900 text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-100"
                 >
-                  <RefreshCw size={24} />
+                  <RefreshCw size={20} className="sm:w-6 sm:h-6" />
                   Try Again
                 </button>
               </div>
 
-              <div className="pt-8 border-t border-zinc-100 flex flex-col items-center gap-6 relative z-10">
-                <p className="text-zinc-400 font-black text-[10px] uppercase tracking-widest">More for you</p>
-                <div className="flex items-center gap-8">
-                  <Link to="/vote" className="text-zinc-900 font-black text-xs uppercase tracking-widest hover:text-[#046A38] transition-colors">Cast Vote</Link>
-                  <div className="w-1.5 h-1.5 bg-zinc-200 rounded-full" />
-                  <Link to="/results" className="text-zinc-900 font-black text-xs uppercase tracking-widest hover:text-[#046A38] transition-colors">View Trends</Link>
-                  <div className="w-1.5 h-1.5 bg-zinc-200 rounded-full" />
-                  <Link to="/forum" className="text-zinc-900 font-black text-xs uppercase tracking-widest hover:text-[#046A38] transition-colors">Join Forum</Link>
+              <div className="pt-6 sm:pt-8 border-t border-zinc-100 flex flex-col items-center gap-4 sm:gap-6 relative z-10">
+                <p className="text-zinc-400 font-black text-[9px] sm:text-[10px] uppercase tracking-widest">More for you</p>
+                <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
+                  <Link to="/vote" className="text-zinc-900 font-black text-[10px] sm:text-xs uppercase tracking-widest hover:text-[#046A38] transition-colors">Cast Vote</Link>
+                  <div className="hidden sm:block w-1.5 h-1.5 bg-zinc-200 rounded-full" />
+                  <Link to="/results" className="text-zinc-900 font-black text-[10px] sm:text-xs uppercase tracking-widest hover:text-[#046A38] transition-colors">View Trends</Link>
+                  <div className="hidden sm:block w-1.5 h-1.5 bg-zinc-200 rounded-full" />
+                  <Link to="/forum" className="text-zinc-900 font-black text-[10px] sm:text-xs uppercase tracking-widest hover:text-[#046A38] transition-colors">Join Forum</Link>
                 </div>
               </div>
             </motion.div>

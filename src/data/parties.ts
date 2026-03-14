@@ -30,7 +30,7 @@ export const parties: Party[] = [
   { id: "MMK", name: "MMK", color: "#008000", image: getPartyImage('MMK.jpg'), axis: 'RULING' },
   
   // OPPOSITION FRONT (AIADMK/NDA)
-  { id: "AIADMK", name: "AIDMK", color: "#008000", image: getPartyImage('AIDMK.jpg'), axis: 'OPPOSITION' },
+  { id: "AIADMK", name: "AIADMK", color: "#008000", image: getPartyImage('AIADMK.jpg'), axis: 'OPPOSITION' },
   { id: "BJP", name: "BJP", color: "#FF9933", image: getPartyImage('BJP.jpg'), axis: 'OPPOSITION' },
   { id: "PMK", name: "PMK", color: "#FFFF00", image: getPartyImage('PMK.jpg'), axis: 'OPPOSITION' },
   { id: "DMDK", name: "DMDK", color: "#FFD700", image: getPartyImage('DMDK.jpg'), axis: 'OPPOSITION' },

@@ -44,12 +44,12 @@ const Countdown: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-sm border border-zinc-100 relative overflow-hidden group">
-      <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
+    <div className="bg-zinc-900 text-white rounded-[2.5rem] p-8 sm:p-10 shadow-2xl relative overflow-hidden group border border-white/5">
+      <div className="absolute top-0 right-0 p-6 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
         <Vote size={120} />
       </div>
-      <h3 className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-center font-display">
-        {t.countdownTitle}
+      <h3 className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.4em] mb-8 text-center font-display">
+        The Final Countdown
       </h3>
       <div className="grid grid-cols-4 gap-3 sm:gap-6">
         {units.map((unit, idx) => (
@@ -58,13 +58,13 @@ const Countdown: React.FC = () => {
               key={unit.value}
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="bg-zinc-50 w-full aspect-square flex items-center justify-center rounded-3xl border border-zinc-100 mb-3 shadow-inner group-hover:border-emerald-100 transition-colors"
+              className="bg-white/5 w-full aspect-square flex items-center justify-center rounded-3xl border border-white/10 mb-3 backdrop-blur-md group-hover:border-emerald-500/30 transition-colors"
             >
-              <span className="text-2xl sm:text-5xl font-black text-zinc-900 font-display tracking-tighter">
+              <span className="text-2xl sm:text-5xl font-black text-white font-display tracking-tighter">
                 {unit.value.toString().padStart(2, '0')}
               </span>
             </motion.div>
-            <span className="text-[10px] sm:text-xs text-zinc-400 font-black uppercase tracking-widest">
+            <span className="text-[10px] sm:text-xs text-zinc-500 font-black uppercase tracking-widest">
               {unit.label}
             </span>
           </div>

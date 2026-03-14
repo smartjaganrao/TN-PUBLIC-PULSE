@@ -20,8 +20,6 @@ import {
 import { Link } from 'react-router-dom';
 import { Trophy, MapPin, Globe, Loader2, Database, Trash2, ArrowLeft, Vote, Users, ChevronRight, Share2, Twitter, Facebook, MessageCircle, RefreshCw, Zap, TrendingUp } from 'lucide-react';
 import { clearAllData, subscribeToOverallResults, getDistrictResults } from '../services/voteService';
-import CommentSection from '../components/CommentSection';
-import BattleArena from '../components/BattleArena';
 
 const ResultsPage: React.FC = () => {
   const { t } = useLanguage();
@@ -32,6 +30,14 @@ const ResultsPage: React.FC = () => {
   const [districtLoading, setDistrictLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overall' | 'districts' | 'axis' | 'social'>('overall');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const shareUrl = window.location.origin + '/results';
   const shareMessage = "Check out the live Tamil Nadu 2026 election predictions! See who's leading district by district. 🗳️🔥";
@@ -174,24 +180,24 @@ const ResultsPage: React.FC = () => {
         </div>
 
         {/* Tab Navigation - Dopamine Tabs */}
-        <div className="bg-white p-1.5 rounded-2xl border border-zinc-100 shadow-sm flex gap-1 overflow-x-auto no-scrollbar">
+        <div className="bg-white p-1.5 rounded-2xl border border-zinc-100 shadow-sm flex gap-1 overflow-x-auto no-scrollbar max-w-full">
           {[
             { id: 'overall', label: 'Global', icon: <Globe size={14} /> },
             { id: 'axis', label: 'Three-Axis', icon: <Database size={14} /> },
-            { id: 'districts', label: 'Districts', icon: <MapPin size={14} /> },
-            { id: 'social', label: 'Social', icon: <MessageCircle size={14} /> }
+            { id: 'districts', label: 'Districts', icon: <MapPin size={14} /> }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                 activeTab === tab.id 
                   ? 'bg-zinc-900 text-white shadow-xl' 
                   : 'text-zinc-400 hover:bg-zinc-50'
               }`}
             >
               {tab.icon}
-              {tab.label}
+              <span className="hidden xs:inline">{tab.label}</span>
+              <span className="xs:hidden">{tab.label.substring(0, 3)}</span>
             </button>
           ))}
         </div>
@@ -222,38 +228,38 @@ const ResultsPage: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-12 gap-6"
           >
             {/* Main Leader Bento Box */}
-            <div className="lg:col-span-4 bg-zinc-900 text-white rounded-[2.5rem] p-8 flex flex-col items-center text-center justify-center relative overflow-hidden shadow-2xl min-h-[400px]">
+            <div className="lg:col-span-4 bg-zinc-900 text-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 flex flex-col items-center text-center justify-center relative overflow-hidden shadow-2xl min-h-[350px] sm:min-h-[400px]">
               <div className="absolute inset-0 bg-gradient-to-br from-[#046A38]/40 to-transparent opacity-50" />
               {overallLeader && (
                 <div className="absolute inset-0 opacity-10">
-                  <PartyImage src={overallLeader.image} alt="" className="w-full h-full blur-md" aria-hidden="true" />
+                  <PartyImage src={overallLeader.image} alt="" className="w-full h-full blur-md object-cover" aria-hidden="true" />
                 </div>
               )}
-              <div className="relative z-10 space-y-6">
-                <div className="bg-white/10 backdrop-blur-md p-3 rounded-2xl inline-block border border-white/10 animate-float">
-                  <Trophy className="text-amber-400" size={32} />
+              <div className="relative z-10 space-y-4 sm:space-y-6">
+                <div className="bg-white/10 backdrop-blur-md p-2.5 sm:p-3 rounded-2xl inline-block border border-white/10 animate-float">
+                  <Trophy className="text-amber-400 w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
-                <p className="text-[8px] font-black uppercase tracking-[0.5em] text-emerald-400">Current Leader</p>
+                <p className="text-[7px] sm:text-[8px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em] text-emerald-400">Current Leader</p>
                 {overallLeader ? (
                   <>
                     <div className="relative">
                       <PartyImage 
                         src={overallLeader.image} 
                         alt={overallLeader.name} 
-                        className="w-32 h-32 rounded-full border-4 border-white/10 mx-auto shadow-2xl bg-white p-2" 
+                        className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white/10 mx-auto shadow-2xl bg-white p-2" 
                         fallbackText={overallLeader.name}
                       />
-                      <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full border-4 border-zinc-900 shadow-xl flex items-center justify-center text-white font-black text-sm" style={{ backgroundColor: overallLeader.color }}>
+                      <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full border-4 border-zinc-900 shadow-xl flex items-center justify-center text-white font-black text-xs sm:text-sm" style={{ backgroundColor: overallLeader.color }}>
                         {overallLeader.name[0]}
                       </div>
                     </div>
-                    <h3 className="text-5xl font-black tracking-tighter font-display leading-none">{overallLeader.name}</h3>
-                    <div className="bg-white/5 backdrop-blur-md px-6 py-2 rounded-full text-[8px] font-black uppercase tracking-widest border border-white/10">
+                    <h3 className="text-3xl sm:text-5xl font-black tracking-tighter font-display leading-none">{overallLeader.name}</h3>
+                    <div className="bg-white/5 backdrop-blur-md px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest border border-white/10">
                       {overallData.totalVotes} Total Votes
                     </div>
                   </>
                 ) : (
-                  <p className="text-zinc-500 font-black uppercase tracking-widest">No Data</p>
+                  <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px]">No Data</p>
                 )}
               </div>
             </div>
@@ -261,22 +267,22 @@ const ResultsPage: React.FC = () => {
             {/* Stats Bento Grid */}
             <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Chart Box */}
-              <div className="md:col-span-2 bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm flex flex-col gap-6">
+              <div className="md:col-span-2 bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-zinc-100 shadow-sm flex flex-col gap-4 sm:gap-6">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Vote Distribution</h4>
-                  <div className="flex items-center gap-2 text-[8px] font-black text-emerald-600 uppercase tracking-widest">
+                  <h4 className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400">Vote Distribution</h4>
+                  <div className="flex items-center gap-2 text-[7px] sm:text-[8px] font-black text-emerald-600 uppercase tracking-widest">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Live
                   </div>
                 </div>
-                <div className="h-[250px]">
+                <div className="h-[200px] sm:h-[250px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={overallChartData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                      <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} fontWeight={800} dy={10} />
+                      <XAxis dataKey="name" fontSize={isMobile ? 8 : 10} axisLine={false} tickLine={false} fontWeight={800} dy={10} />
                       <YAxis hide />
                       <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                      <Bar dataKey="votes" radius={[6, 6, 0, 0]} barSize={40}>
+                      <Bar dataKey="votes" radius={[6, 6, 0, 0]} barSize={isMobile ? 30 : 40}>
                         {overallChartData.map((entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
@@ -287,27 +293,27 @@ const ResultsPage: React.FC = () => {
               </div>
 
               {/* Mini Stats */}
-              <div className="bg-emerald-50 p-8 rounded-[2.5rem] border border-emerald-100 flex flex-col justify-center gap-4 group">
-                <div className="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:scale-110 transition-transform">
-                  <Users size={20} />
+              <div className="bg-emerald-50 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-emerald-100 flex flex-col justify-center gap-3 sm:gap-4 group">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:scale-110 transition-transform">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <p className="text-4xl font-black text-zinc-900 font-display tracking-tighter">{overallData?.totalVotes?.toLocaleString() || 0}</p>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Total Participants</p>
+                  <p className="text-3xl sm:text-4xl font-black text-zinc-900 font-display tracking-tighter">{overallData?.totalVotes?.toLocaleString() || 0}</p>
+                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-600">Total Participants</p>
                 </div>
               </div>
 
-              <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm flex items-center justify-between group">
+              <div className="bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-zinc-100 shadow-sm flex items-center justify-between group">
                 <div className="space-y-1">
-                  <p className="text-2xl font-black text-zinc-900 font-display tracking-tight">
+                  <p className="text-xl sm:text-2xl font-black text-zinc-900 font-display tracking-tight">
                     {overallChartData[0]?.votes > 0 ? Math.round((overallChartData[0].votes / overallData.totalVotes) * 100) : 0}%
                   </p>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Dominance</p>
+                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400">Dominance</p>
                 </div>
-                <div className="h-16 w-16">
+                <div className="h-12 w-12 sm:h-16 sm:w-16">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={overallChartData} innerRadius={20} outerRadius={30} paddingAngle={5} dataKey="votes">
+                      <Pie data={overallChartData} innerRadius={isMobile ? 15 : 20} outerRadius={isMobile ? 25 : 30} paddingAngle={5} dataKey="votes">
                         {overallChartData.map((entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
@@ -318,24 +324,24 @@ const ResultsPage: React.FC = () => {
               </div>
 
               {/* Youth Pulse Insight */}
-              <div className="md:col-span-2 bg-gradient-to-r from-indigo-500 to-purple-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Zap size={80} />
+              <div className="md:col-span-2 bg-gradient-to-r from-indigo-500 to-purple-600 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Zap className="w-16 h-16 sm:w-20 sm:h-20" />
                 </div>
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                  <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[8px] font-black uppercase tracking-widest">
-                      <TrendingUp size={12} className="text-amber-300" />
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+                  <div className="space-y-2 text-center md:text-left">
+                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-[7px] sm:text-[8px] font-black uppercase tracking-widest">
+                      <TrendingUp size={10} className="text-amber-300 sm:w-3 sm:h-3" />
                       Youth Pulse
                     </div>
-                    <h4 className="text-2xl font-black font-display tracking-tight">The "New Contender" Factor</h4>
-                    <p className="text-white/70 text-sm font-medium max-w-md">TVK and NTK are showing significant traction among digital-first voters. Their combined vote share is a key metric to watch.</p>
+                    <h4 className="text-xl sm:text-2xl font-black font-display tracking-tight">The "New Contender" Factor</h4>
+                    <p className="text-white/70 text-xs sm:text-sm font-medium max-w-md">TVK and NTK are showing significant traction among digital-first voters. Their combined vote share is a key metric to watch.</p>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 text-center min-w-[150px]">
-                    <p className="text-4xl font-black font-display">
+                  <div className="bg-white/10 backdrop-blur-md p-4 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border border-white/10 text-center min-w-[120px] sm:min-w-[150px]">
+                    <p className="text-3xl sm:text-4xl font-black font-display">
                       {overallData ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%
                     </p>
-                    <p className="text-[8px] font-black uppercase tracking-widest text-white/60 mt-1">Combined Share</p>
+                    <p className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-white/60 mt-1">Combined Share</p>
                   </div>
                 </div>
               </div>
@@ -491,23 +497,6 @@ const ResultsPage: React.FC = () => {
                 </div>
               </div>
             )}
-          </motion.div>
-        )}
-
-        {activeTab === 'social' && (
-          <motion.div
-            key="social"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-8"
-          >
-            <div className="lg:col-span-3 space-y-6">
-              <BattleArena />
-            </div>
-            <div className="lg:col-span-9 space-y-6">
-              <CommentSection />
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

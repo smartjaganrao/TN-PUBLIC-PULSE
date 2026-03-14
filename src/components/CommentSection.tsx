@@ -91,12 +91,13 @@ const CommentItem = React.forwardRef<HTMLDivElement, { comment: Comment }>(({ co
             {comment.partyId && (
               <div 
                 className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white overflow-hidden bg-white shadow-sm"
-                title={`Supports ${parties.find(p => p.id === comment.partyId)?.name}`}
+                title={comment.partyId ? `Supports ${parties.find(p => p.id === comment.partyId)?.name || 'a party'}` : ''}
               >
                 <PartyImage 
                   src={parties.find(p => p.id === comment.partyId)?.image || ''} 
                   alt="party" 
                   className="w-full h-full p-0.5"
+                  fallbackText={parties.find(p => p.id === comment.partyId)?.name[0] || '?'}
                 />
               </div>
             )}
@@ -106,10 +107,10 @@ const CommentItem = React.forwardRef<HTMLDivElement, { comment: Comment }>(({ co
               <h4 className="font-black text-zinc-900">{comment.nickname}</h4>
               {comment.partyId && (
                 <span 
-                  className="text-[8px] font-black px-1.5 py-0.5 rounded-full text-white uppercase tracking-tighter"
-                  style={{ backgroundColor: parties.find(p => p.id === comment.partyId)?.color }}
+                  className="text-[8px] font-black px-2 py-0.5 rounded-full text-white uppercase tracking-widest shadow-sm"
+                  style={{ backgroundColor: parties.find(p => p.id === comment.partyId)?.color || '#141414' }}
                 >
-                  {parties.find(p => p.id === comment.partyId)?.name}
+                  {parties.find(p => p.id === comment.partyId)?.name || 'Party'}
                 </span>
               )}
             </div>
@@ -304,63 +305,81 @@ const CommentSection = React.forwardRef<HTMLDivElement>((_, ref) => {
       <div className="grid grid-cols-1 gap-8">
         {/* Comment Form */}
         <div className="w-full">
-          <div className="glass p-6 rounded-[2rem] mb-8">
-            <h3 className="text-lg font-black mb-4 font-display">Join the Conversation</h3>
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 items-end">
-              <div className="flex-1 w-full space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Nickname</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
-                      <input
-                        type="text"
-                        value={nickname}
-                        onChange={(e) => setNickname(e.target.value)}
-                        placeholder="e.g. Tamilan"
-                        className="w-full bg-white border border-zinc-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Support (Optional)</label>
-                    <div className="flex gap-1">
-                      {parties.map(p => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => setSelectedPartyId(selectedPartyId === p.id ? '' : p.id)}
-                          className={`relative w-8 h-8 rounded-lg border transition-all overflow-hidden p-0.5 ${
-                            selectedPartyId === p.id ? 'border-indigo-500 scale-110 shadow-md' : 'border-transparent bg-zinc-50 opacity-60'
-                          }`}
-                          title={p.name}
-                        >
-                          <PartyImage src={p.image} alt={p.name} className="w-full h-full" />
-                        </button>
-                      ))}
-                    </div>
+          <div className="bg-white p-6 sm:p-8 rounded-[2.5rem] border border-zinc-100 shadow-xl mb-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[50px] -mr-16 -mt-16" />
+            
+            <h3 className="text-xl font-black mb-6 font-display flex items-center gap-2">
+              Join the Conversation
+              <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-widest">Live</span>
+            </h3>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Nickname Input */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Nickname</label>
+                  <div className="relative group">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
+                    <input
+                      type="text"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      placeholder="e.g. Tamilan"
+                      className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-200 outline-none transition-all"
+                      required
+                    />
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Your Thoughts</label>
+
+                {/* Party Support Selection */}
+                <div className="space-y-2 overflow-hidden">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Support (Optional)</label>
+                  <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar scroll-smooth">
+                    {parties.map(p => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedPartyId(selectedPartyId === p.id ? '' : p.id)}
+                        className={`relative w-12 h-12 rounded-2xl border transition-all shrink-0 overflow-hidden p-1 flex items-center justify-center ${
+                          selectedPartyId === p.id 
+                            ? 'border-indigo-500 bg-indigo-50 scale-105 shadow-lg ring-2 ring-indigo-500/20' 
+                            : 'border-zinc-100 bg-zinc-50 opacity-60 hover:opacity-100 hover:border-zinc-200'
+                        }`}
+                        title={p.name}
+                      >
+                        <PartyImage src={p.image} alt={p.name} className="w-full h-full rounded-lg" />
+                        {selectedPartyId === p.id && (
+                          <div className="absolute inset-0 bg-indigo-500/10 pointer-events-none" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Message Input */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Your Thoughts</label>
+                <div className="relative">
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    placeholder="What's your prediction for 2026?"
-                    rows={2}
-                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+                    placeholder="What's your prediction for 2026? Share your voice..."
+                    rows={3}
+                    className="w-full bg-zinc-50 border border-zinc-100 rounded-[2rem] px-6 py-5 text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-200 outline-none transition-all resize-none leading-relaxed"
                     required
                   />
+                  <div className="absolute bottom-4 right-4">
+                    <button
+                      type="submit"
+                      disabled={submitting || !nickname.trim() || !content.trim()}
+                      className="bg-indigo-600 text-white p-4 rounded-2xl font-black hover:bg-indigo-700 transition-all disabled:opacity-50 shadow-xl shadow-indigo-200 active:scale-95 flex items-center justify-center"
+                    >
+                      {submitting ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
+                    </button>
+                  </div>
                 </div>
               </div>
-              <button
-                type="submit"
-                disabled={submitting || !nickname.trim() || !content.trim()}
-                className="bg-indigo-600 text-white p-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 shadow-lg shadow-indigo-200 h-fit"
-              >
-                {submitting ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
-              </button>
             </form>
           </div>
         </div>

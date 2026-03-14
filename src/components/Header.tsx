@@ -21,11 +21,12 @@ const Header: React.FC = () => {
   }, [location]);
 
   const navLinks = [
-    { path: '/vote', label: t.startVoting },
-    { path: '/results', label: t.viewResults },
+    { path: '/vote', label: 'Vote' },
+    { path: '/results', label: 'Trends' },
+    { path: '/pulse', label: 'Community Pulse' },
     { path: '/forum', label: 'Debate' },
     { path: '/game', label: 'Quiz' },
-    { path: '/blog', label: 'Insights' },
+    { path: '/shop', label: 'Supporter Shop' },
   ];
 
   const isHomePage = location.pathname === '/';
@@ -44,7 +45,7 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center">
           <Link to="/" className="flex flex-col group">
             <div className="flex items-center gap-2">
-              <h1 className={`text-xl sm:text-2xl font-black tracking-tighter leading-none transition-colors ${
+              <h1 className={`text-lg sm:text-2xl font-black tracking-tighter leading-none transition-colors ${
                 isScrolled ? 'text-[#046A38]' : isHomePage ? 'text-white max-md:text-[#046A38]' : 'text-[#046A38]'
               }`}>
                 {t.title}
@@ -53,14 +54,14 @@ const Header: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-500 text-[8px] font-black text-white uppercase tracking-widest"
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-500 text-[6px] sm:text-[8px] font-black text-white uppercase tracking-widest"
                 >
                   <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
                   Live
                 </motion.div>
               )}
             </div>
-            <p className={`text-[8px] sm:text-[10px] opacity-60 mt-1 uppercase tracking-[0.3em] font-black transition-colors ${
+            <p className={`text-[7px] sm:text-[10px] opacity-60 mt-0.5 sm:mt-1 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-black transition-colors ${
               (isScrolled || !isHomePage) ? 'text-zinc-500' : 'text-white/80 max-md:text-zinc-500'
             }`}>
               {t.subtitle}

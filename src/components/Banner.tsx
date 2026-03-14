@@ -63,25 +63,25 @@ const Banner: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto w-full px-4 mb-12">
-      <div className="relative h-48 sm:h-64 rounded-[2.5rem] overflow-hidden bg-zinc-900 shadow-2xl group">
+      <div className="relative min-h-[16rem] sm:h-64 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden bg-zinc-900 shadow-2xl group">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="absolute inset-0 flex items-center p-8 sm:p-12"
+            className="absolute inset-0 flex items-center p-6 sm:p-12"
           >
             <div className="absolute inset-0 opacity-20">
               <PartyImage 
                 src={trending[currentIndex].image} 
                 alt="" 
-                className="w-full h-full blur-xl"
+                className="w-full h-full blur-xl object-cover"
               />
             </div>
             
-            <div className="relative z-10 flex flex-col sm:flex-row items-center gap-8 w-full">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white p-4 shadow-2xl flex-shrink-0">
+            <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
+              <div className="w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-white p-2 sm:p-4 shadow-2xl flex-shrink-0">
                 <PartyImage 
                   src={trending[currentIndex].image} 
                   alt={trending[currentIndex].name} 
@@ -91,24 +91,24 @@ const Banner: React.FC = () => {
               </div>
               
               <div className="flex-1 text-center sm:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-3">
-                  <TrendingUp size={12} />
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-[7px] sm:text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-2 sm:mb-3">
+                  <TrendingUp size={10} className="sm:w-3 sm:h-3" />
                   {trending[currentIndex].type}
                 </div>
-                <h3 className="text-3xl sm:text-5xl font-black text-white font-display tracking-tighter leading-none mb-2">
+                <h3 className="text-xl sm:text-5xl font-black text-white font-display tracking-tighter leading-none mb-1 sm:mb-2">
                   {trending[currentIndex].name}
                 </h3>
-                <p className="text-zinc-400 font-medium text-sm sm:text-lg">
+                <p className="text-zinc-400 font-medium text-xs sm:text-lg line-clamp-2 sm:line-clamp-none">
                   {trending[currentIndex].description}
                 </p>
               </div>
-
+ 
               <Link 
                 to={trending[currentIndex].link || '/results'} 
-                className="bg-white text-zinc-900 px-8 py-4 rounded-full font-black text-sm flex items-center gap-2 hover:bg-emerald-400 transition-all shadow-xl"
+                className="bg-white text-zinc-900 px-6 sm:px-8 py-2.5 sm:py-4 rounded-full font-black text-[10px] sm:text-sm flex items-center gap-2 hover:bg-emerald-400 transition-all shadow-xl whitespace-nowrap"
               >
                 View Details
-                <ChevronRight size={18} />
+                <ChevronRight size={16} className="sm:w-[18px] sm:h-[18px]" />
               </Link>
             </div>
           </motion.div>

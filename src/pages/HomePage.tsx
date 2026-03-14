@@ -2,15 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { motion } from 'motion/react';
-import { Vote, BarChart3, Users, ChevronRight, AlertCircle, MessageSquare, Target, Trophy, Eye } from 'lucide-react';
+import { Vote, BarChart3, Users, ChevronRight, AlertCircle, MessageSquare, Target, Trophy, Eye, Share2, Zap, ShoppingBag, BookOpen } from 'lucide-react';
 import Countdown from '../components/Countdown';
 import Banner from '../components/Banner';
+import LivePulseBanner from '../components/LivePulseBanner';
 import { getOverallResults, incrementVisitorCount, subscribeToVisitorCount } from '../services/voteService';
 
 const HomePage: React.FC = () => {
   const { t } = useLanguage();
   const [totalVotes, setTotalVotes] = useState<number>(0);
   const [visitorCount, setVisitorCount] = useState<number>(0);
+  const [showShareMotivation, setShowShareMotivation] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowShareMotivation(true), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     incrementVisitorCount();
@@ -36,145 +43,263 @@ const HomePage: React.FC = () => {
     fetchVotes();
   }, []);
 
+  const handleShare = () => {
+    const shareUrl = window.location.origin;
+    const shareText = "I just shared my opinion on Tamil Pulse 2026! 🗳️ Join the digital revolution and see who's leading. 🔥 #TamilPulse2026";
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'Tamil Pulse 2026',
+        text: shareText,
+        url: shareUrl,
+      });
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`, '_blank');
+    }
+  };
+
   return (
     <div className="flex flex-col gap-12 pb-20">
-      {/* Hero Section - More Compact & High Impact */}
-      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-[#046A38] text-white px-4 rounded-b-[3rem] sm:rounded-b-[5rem] shadow-2xl">
+      {/* Hero Section - Viral & High Impact */}
+      <section className="relative min-h-[65vh] sm:min-h-[75vh] flex items-center justify-center overflow-hidden bg-[#046A38] text-white px-4 rounded-b-[3rem] sm:rounded-b-[6rem] shadow-2xl">
         <div className="absolute inset-0 overflow-hidden">
           <motion.div 
-            animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.15, 0.1] }}
-            transition={{ duration: 20, repeat: Infinity }}
-            className="absolute -top-1/4 -left-1/4 w-full h-full bg-emerald-400 rounded-full blur-[160px]" 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 15, repeat: Infinity }}
+            className="absolute -top-1/4 -right-1/4 w-full h-full bg-emerald-300 rounded-full blur-[120px] sm:blur-[200px]" 
           />
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5" />
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
         </div>
         
-        <div className="max-w-6xl mx-auto text-center relative z-10 py-12">
+        <div className="max-w-6xl mx-auto text-center relative z-10 py-20 sm:py-16">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[8px] font-black uppercase tracking-[0.4em]">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-              Live Community Pulse
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 sm:mb-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em]">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+              {visitorCount.toLocaleString()} Live Visitors
             </div>
-            <h2 className="text-5xl sm:text-[8rem] font-black mb-6 tracking-tighter leading-[0.85] font-display">
-              {t.title}
+            <h2 className="text-5xl sm:text-8xl lg:text-[10rem] font-black mb-8 tracking-tighter leading-[0.85] sm:leading-[0.8] font-display">
+              VOTE.<br />
+              <span className="text-emerald-400">TREND.</span><br />
+              SHARE.
             </h2>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-6">
-              <Link to="/vote" className="btn-primary group w-full sm:w-auto px-10 py-4 text-lg">
-                <Vote size={20} className="group-hover:rotate-12 transition-transform" />
-                {t.startVoting}
+            <p className="text-white/80 text-sm sm:text-xl font-medium max-w-2xl mx-auto mb-10 sm:mb-12 px-6">
+              Tamil Nadu's first real-time community pulse. Don't just watch the news, <span className="text-white font-black underline decoration-emerald-400 decoration-4 underline-offset-4">be the news.</span>
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 sm:px-6">
+              <Link to="/vote" className="btn-primary group w-full sm:w-auto px-10 sm:px-14 py-4 sm:py-5 text-lg sm:text-xl shadow-[0_20px_50px_rgba(16,185,129,0.3)]">
+                <Vote size={24} className="group-hover:rotate-12 transition-transform" />
+                Cast Your Vote
               </Link>
-              <Link to="/results" className="glass-dark px-10 py-4 rounded-full font-black text-lg hover:bg-white/20 transition-all flex items-center justify-center gap-3 w-full sm:w-auto border border-white/20">
-                <BarChart3 size={20} />
-                {t.viewResults}
+              <Link to="/results" className="glass-dark px-10 sm:px-14 py-4 sm:py-5 rounded-full font-black text-lg sm:text-xl hover:bg-white/20 transition-all flex items-center justify-center gap-3 w-full sm:w-auto border border-white/20">
+                <BarChart3 size={24} />
+                Live Trends
               </Link>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Dynamic Banner Section - Overlapping Hero */}
-      <div className="-mt-24 relative z-30">
-        <Banner />
+      {/* Live Pulse Banner - Real-time Graph */}
+      <div className="-mt-32 relative z-30">
+        <LivePulseBanner />
       </div>
+
+      {/* Viral Motivation Section */}
+      <section className="max-w-6xl mx-auto w-full px-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-zinc-900 rounded-[3rem] p-8 sm:p-12 text-white relative overflow-hidden border border-white/5"
+        >
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] -mr-48 -mt-48" />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="space-y-4 text-center md:text-left">
+              <h3 className="text-3xl sm:text-5xl font-black font-display tracking-tight">Make it <span className="text-emerald-400">Viral.</span></h3>
+              <p className="text-zinc-400 text-sm sm:text-lg max-w-md font-medium">
+                The more people share, the more accurate the pulse. Invite your friends and let's show the world what the youth of TN thinks!
+              </p>
+              <div className="flex items-center justify-center md:justify-start gap-4 text-emerald-400 font-black text-[10px] uppercase tracking-widest">
+                <div className="flex -space-x-2">
+                  {[1,2,3,4].map(i => (
+                    <img key={i} src={`https://i.pravatar.cc/100?img=${i+10}`} className="w-8 h-8 rounded-full border-2 border-zinc-900" alt="" />
+                  ))}
+                </div>
+                <span>+12.4k shared today</span>
+              </div>
+            </div>
+            <button 
+              onClick={handleShare}
+              className="w-full md:w-auto bg-white text-zinc-900 px-12 py-5 rounded-full font-black text-xl flex items-center justify-center gap-3 hover:bg-emerald-400 hover:text-white transition-all active:scale-95 shadow-2xl"
+            >
+              <Share2 size={24} />
+              Share Now
+            </button>
+          </div>
+        </motion.div>
+      </section>
 
       {/* Bento Dashboard Grid */}
       <div className="max-w-6xl mx-auto w-full px-4 relative z-20 grid grid-cols-1 md:grid-cols-12 gap-6">
+        {/* Share Your Voice Bento */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="md:col-span-8 bg-white rounded-[3rem] p-8 sm:p-12 border border-zinc-100 shadow-xl relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32 group-hover:bg-emerald-500/10 transition-colors" />
+          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-8">
+            <div className="flex-1 space-y-6 text-center sm:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-[#046A38] text-[10px] font-black uppercase tracking-widest">
+                <Target size={12} /> Action Required
+              </div>
+              <h3 className="text-4xl sm:text-6xl font-black font-display tracking-tighter leading-none text-zinc-900">
+                SHARE YOUR <span className="text-[#046A38]">VOICE.</span>
+              </h3>
+              <p className="text-zinc-500 font-bold text-lg">
+                Cast your digital vote in seconds. No complex forms, just your opinion.
+              </p>
+              <Link to="/vote" className="inline-flex items-center gap-3 bg-zinc-900 text-white px-10 py-5 rounded-full font-black text-xl hover:bg-[#046A38] transition-all shadow-2xl active:scale-95">
+                Start Now <ChevronRight size={24} />
+              </Link>
+            </div>
+            <div className="w-full sm:w-48 aspect-square bg-zinc-50 rounded-[2.5rem] flex items-center justify-center border border-zinc-100 shadow-inner group-hover:rotate-6 transition-transform">
+              <Vote size={80} className="text-[#046A38] opacity-20" />
+            </div>
+          </div>
+        </motion.div>
+
         {/* Live Stats Bento */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="md:col-span-4 glass p-8 rounded-[2.5rem] flex flex-col justify-center items-center text-center card-hover border border-white/50"
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="md:col-span-4 bg-white rounded-[3rem] p-8 border border-zinc-100 shadow-xl flex flex-col justify-between relative overflow-hidden group"
         >
-          <div className="bg-[#046A38]/10 p-4 rounded-2xl mb-4 animate-float">
-            <Users className="text-[#046A38]" size={32} />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-rose-500/5 blur-[50px] -ml-16 -mb-16" />
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-8">
+              <div className="p-3 bg-zinc-50 rounded-2xl border border-zinc-100">
+                <Users size={24} className="text-zinc-400" />
+              </div>
+              <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
+              </div>
+            </div>
+            <h4 className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Total Participation</h4>
+            <div className="text-5xl font-black text-zinc-900 font-display tracking-tighter mb-4">
+              {totalVotes.toLocaleString()}
+            </div>
+            <p className="text-zinc-500 text-xs font-bold">Votes recorded across all 38 districts in Tamil Nadu.</p>
           </div>
-          <h3 className="text-zinc-400 text-[8px] font-black uppercase tracking-[0.3em] mb-2 font-display">
-            {t.totalVotes}
-          </h3>
-          <p className="text-5xl font-black text-zinc-900 tracking-tighter font-display">
-            {totalVotes.toLocaleString()}
-          </p>
-          <div className="mt-4 flex items-center gap-2 text-emerald-600 font-bold text-[10px] uppercase tracking-widest">
-            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Live Pulse
-          </div>
+          <Link to="/results" className="relative z-10 mt-8 flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100 group-hover:bg-[#046A38] group-hover:text-white transition-all">
+            <span className="text-[10px] font-black uppercase tracking-widest">Full Stats</span>
+            <BarChart3 size={18} />
+          </Link>
         </motion.div>
-
         {/* Quiz Bento */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="md:col-span-8 bg-zinc-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-2xl"
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="md:col-span-12 bg-zinc-900 rounded-[3rem] p-8 sm:p-12 text-white relative overflow-hidden group border border-white/5"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Trophy size={120} />
-          </div>
-          <div className="relative z-10 h-full flex flex-col justify-between">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[8px] font-black uppercase tracking-widest">
-                <Target size={12} className="text-amber-400" />
-                Challenge
+          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 blur-[100px] -mr-48 -mt-48 group-hover:bg-amber-500/20 transition-colors" />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="space-y-6 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest">
+                <Trophy size={14} className="text-amber-400" /> Community Challenge
               </div>
-              <h3 className="text-3xl font-black font-display tracking-tight">Community Quiz</h3>
-              <p className="text-zinc-400 text-sm font-medium max-w-md">Test your knowledge of Tamil Nadu's culture, history, and current affairs!</p>
+              <h3 className="text-4xl sm:text-6xl font-black font-display tracking-tighter leading-none">
+                POLITICAL <span className="text-amber-400">IQ TEST.</span>
+              </h3>
+              <p className="text-zinc-400 text-sm sm:text-xl font-medium max-w-xl">
+                Think you know TN politics better than your friends? Prove it, earn your rank, and share your score to challenge the squad!
+              </p>
             </div>
-            <Link to="/game" className="mt-6 inline-flex items-center gap-2 bg-amber-400 text-zinc-900 px-8 py-3 rounded-full font-black text-sm hover:bg-white transition-all self-start">
-              Play Now
-              <ChevronRight size={18} />
+            <Link to="/game" className="w-full md:w-auto bg-amber-400 text-zinc-900 px-12 py-5 rounded-full font-black text-xl flex items-center justify-center gap-3 hover:bg-white transition-all active:scale-95 shadow-2xl shadow-amber-400/20">
+              Start Quiz <ChevronRight size={24} />
             </Link>
           </div>
-        </motion.div>
-
-        {/* Forum Bento */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-          className="md:col-span-7 bg-white border border-zinc-100 p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden group"
-        >
-          <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-emerald-50 rounded-full blur-3xl group-hover:scale-150 transition-transform" />
-          <div className="relative z-10 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-zinc-900 text-white rounded-xl">
-                <MessageSquare size={20} />
-              </div>
-              <h3 className="text-xl font-black font-display">Community Debate</h3>
-            </div>
-            <p className="text-zinc-500 text-sm leading-relaxed">Join the discussion on infrastructure, education, culture, and social welfare. Let your voice be heard.</p>
-            <Link to="/forum" className="inline-flex items-center gap-2 text-[#046A38] font-black text-xs uppercase tracking-widest group-hover:gap-4 transition-all">
-              Enter Forum <ChevronRight size={14} />
-            </Link>
-          </div>
-        </motion.div>
-
-        {/* Countdown Bento */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-          className="md:col-span-5"
-        >
-          <Countdown />
         </motion.div>
       </div>
 
-      {/* Trending / Features Section - More Compact */}
+      {/* Community Pulse CTA */}
+      <section className="max-w-6xl mx-auto px-4">
+        <div className="bg-indigo-600 rounded-[3rem] p-8 sm:p-16 text-white relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] -mr-48 -mt-48" />
+          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div className="space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest">
+                <MessageSquare size={14} /> Live Interaction
+              </div>
+              <h3 className="text-4xl sm:text-7xl font-black font-display tracking-tighter leading-none">
+                COMMUNITY <span className="text-indigo-300">PULSE.</span>
+              </h3>
+              <p className="text-indigo-100 text-sm sm:text-xl font-medium max-w-xl">
+                Who is the best leader? Join the live battle arena and talk to supporters from all parties in real-time. The ultimate space for cross-party dialogue.
+              </p>
+            </div>
+            <Link to="/pulse" className="w-full lg:w-auto bg-white text-indigo-600 px-12 py-6 rounded-full font-black text-2xl flex items-center justify-center gap-3 hover:bg-indigo-50 transition-all active:scale-95 shadow-2xl">
+              Join the Pulse <Zap size={24} fill="currentColor" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Supporter Shop CTA */}
+      <section className="max-w-6xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-zinc-900 rounded-[3rem] p-8 sm:p-12 text-white flex flex-col justify-between relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[80px] -mr-32 -mt-32 group-hover:bg-emerald-500/20 transition-all" />
+            <div className="space-y-4 relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest">
+                <ShoppingBag size={14} /> Recommended Resources
+              </div>
+              <h3 className="text-4xl font-black font-display tracking-tight">Supporter <span className="text-emerald-400">Shop.</span></h3>
+              <p className="text-zinc-400 text-sm font-medium max-w-md">
+                Get the essential gear and reading materials for the 2026 journey. From political history books to rally essentials.
+              </p>
+            </div>
+            <Link to="/shop" className="mt-8 inline-flex items-center gap-3 text-emerald-400 font-black text-xs uppercase tracking-widest hover:translate-x-2 transition-all">
+              Browse the Shop <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          <div className="bg-white rounded-[3rem] p-8 sm:p-12 border border-zinc-100 shadow-xl flex flex-col justify-between relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[80px] -mr-32 -mt-32 group-hover:bg-indigo-500/10 transition-all" />
+            <div className="space-y-4 relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-[10px] font-black uppercase tracking-widest text-indigo-600">
+                <BookOpen size={14} /> Knowledge Base
+              </div>
+              <h3 className="text-4xl font-black font-display tracking-tight text-zinc-900">Election <span className="text-indigo-600">Insights.</span></h3>
+              <p className="text-zinc-500 text-sm font-medium max-w-md">
+                Deep dive into our blog for expert analysis, historical context, and data-driven predictions for Tamil Nadu.
+              </p>
+            </div>
+            <Link to="/blog" className="mt-8 inline-flex items-center gap-3 text-indigo-600 font-black text-xs uppercase tracking-widest hover:translate-x-2 transition-all">
+              Read the Blog <ChevronRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Trending Section */}
       <section className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {[
-            { title: "Real-time", icon: "🔥", color: "bg-orange-50" },
+            { title: "Viral", icon: "🚀", color: "bg-orange-50" },
             { title: "Anonymous", icon: "🛡️", color: "bg-blue-50" },
             { title: "Unbiased", icon: "⚖️", color: "bg-purple-50" },
-            { title: "Viral", icon: "🚀", color: "bg-emerald-50" },
-            { title: `${visitorCount.toLocaleString()} Visitors`, icon: "👁️", color: "bg-zinc-100" }
+            { title: "Real-time", icon: "🔥", color: "bg-emerald-50" },
+            { title: `${visitorCount.toLocaleString()} Active`, icon: "👁️", color: "bg-zinc-100" }
           ].map((item, i) => (
-            <div key={i} className={`${item.color} p-6 rounded-3xl flex items-center gap-4 border border-black/5 hover:scale-105 transition-transform cursor-default`}>
+            <div key={i} className={`${item.color} p-6 rounded-3xl flex items-center gap-4 border border-black/5 hover:scale-105 transition-transform cursor-default shadow-sm`}>
               <span className="text-3xl">{item.icon}</span>
               <span className="font-black text-zinc-900 uppercase tracking-widest text-[10px]">{item.title}</span>
             </div>
