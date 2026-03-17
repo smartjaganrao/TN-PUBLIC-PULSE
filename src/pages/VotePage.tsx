@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../context/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { districts } from '../data/districts';
@@ -134,6 +135,13 @@ const VotePage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8">
+      <Helmet>
+        <title>Vote Now | Tamil Pulse 2026 Assembly Election Prediction</title>
+        <meta name="description" content="Cast your digital vote for the 2026 Tamil Nadu Assembly Elections. Choose your party and district to participate in the community pulse." />
+        <meta property="og:title" content="Vote Now | Tamil Pulse 2026 Assembly Election Prediction" />
+        <meta property="og:description" content="Cast your digital vote for the 2026 Tamil Nadu Assembly Elections. Choose your party and district to participate in the community pulse." />
+        <meta property="og:url" content={`${window.location.origin}/vote`} />
+      </Helmet>
       <div className="mb-6 text-center">
         <h2 className="text-4xl sm:text-6xl font-black text-zinc-900 font-display tracking-tighter mb-2">
           SHARE YOUR <span className="text-[#046A38]">VOICE</span>

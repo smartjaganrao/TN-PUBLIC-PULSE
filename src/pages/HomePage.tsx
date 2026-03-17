@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../context/LanguageContext';
 import { motion } from 'motion/react';
-import { Vote, BarChart3, Users, ChevronRight, AlertCircle, MessageSquare, Target, Trophy, Eye, Share2, Zap, ShoppingBag, BookOpen } from 'lucide-react';
+import { Vote, BarChart3, Users, ChevronRight, AlertCircle, MessageSquare, Target, Trophy, Eye, Share2, Zap, ShoppingBag, BookOpen, ArrowRight } from 'lucide-react';
 import Countdown from '../components/Countdown';
 import Banner from '../components/Banner';
 import LivePulseBanner from '../components/LivePulseBanner';
-import { getOverallResults, incrementVisitorCount, subscribeToVisitorCount } from '../services/voteService';
+import { getOverallResults, incrementVisitorCount, subscribeToVisitorCount, getLatestBlogPosts, BlogPost } from '../services/voteService';
 
 const HomePage: React.FC = () => {
   const { t } = useLanguage();
   const [totalVotes, setTotalVotes] = useState<number>(0);
   const [visitorCount, setVisitorCount] = useState<number>(0);
+  const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
   const [showShareMotivation, setShowShareMotivation] = useState(false);
 
   useEffect(() => {
@@ -43,6 +45,18 @@ const HomePage: React.FC = () => {
     fetchVotes();
   }, []);
 
+  useEffect(() => {
+    const fetchLatestPosts = async () => {
+      try {
+        const posts = await getLatestBlogPosts(3);
+        setLatestPosts(posts);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchLatestPosts();
+  }, []);
+
   const handleShare = () => {
     const shareUrl = window.location.origin;
     const shareText = "I just shared my opinion on Tamil Pulse 2026! 🗳️ Join the digital revolution and see who's leading. 🔥 #TamilPulse2026";
@@ -60,6 +74,15 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-12 pb-20">
+      <Helmet>
+        <title>Tamil Pulse 2026 | TN Election Prediction & Community Hub</title>
+        <meta name="description" content="Tamil Nadu's first real-time community pulse for the 2026 Assembly Elections. Vote, track live trends, and join the political discourse." />
+        <meta property="og:title" content="Tamil Pulse 2026 | TN Election Prediction & Community Hub" />
+        <meta property="og:description" content="Tamil Nadu's first real-time community pulse for the 2026 Assembly Elections. Vote, track live trends, and join the political discourse." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.origin} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       {/* Hero Section - Viral & High Impact */}
       <section className="relative min-h-[65vh] sm:min-h-[75vh] flex items-center justify-center overflow-hidden bg-[#046A38] text-white px-4 rounded-b-[3rem] sm:rounded-b-[6rem] shadow-2xl">
         <div className="absolute inset-0 overflow-hidden">
@@ -216,10 +239,10 @@ const HomePage: React.FC = () => {
                 <Trophy size={14} className="text-amber-400" /> Community Challenge
               </div>
               <h3 className="text-4xl sm:text-6xl font-black font-display tracking-tighter leading-none">
-                POLITICAL <span className="text-amber-400">IQ TEST.</span>
+                TN MASTERMIND <span className="text-amber-400">CHALLENGE.</span>
               </h3>
               <p className="text-zinc-400 text-sm sm:text-xl font-medium max-w-xl">
-                Think you know TN politics better than your friends? Prove it, earn your rank, and share your score to challenge the squad!
+                Think you know TN politics better than your friends? Create a challenge, invite your squad, and see who tops the leaderboard!
               </p>
             </div>
             <Link to="/game" className="w-full md:w-auto bg-amber-400 text-zinc-900 px-12 py-5 rounded-full font-black text-xl flex items-center justify-center gap-3 hover:bg-white transition-all active:scale-95 shadow-2xl shadow-amber-400/20">
@@ -250,6 +273,73 @@ const HomePage: React.FC = () => {
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* Blog Section */}
+      <section className="max-w-6xl mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-12">
+          <div>
+            <h3 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-zinc-900">Election <span className="text-indigo-600">Insights.</span></h3>
+            <p className="text-zinc-500 text-sm sm:text-lg font-medium mt-2">Expert analysis and deep dives into TN 2026.</p>
+          </div>
+          <Link to="/blog" className="hidden sm:flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-widest hover:translate-x-2 transition-all">
+            View All Posts <ChevronRight size={16} />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {latestPosts.length > 0 ? (
+            latestPosts.map((post, i) => (
+              <motion.article
+                key={post.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group bg-white rounded-[2.5rem] overflow-hidden border border-zinc-100 shadow-xl hover:shadow-2xl transition-all flex flex-col"
+              >
+                <Link to={`/blog/${post.slug}`} className="relative aspect-video overflow-hidden">
+                  <img
+                    src={post.imageUrl || `https://picsum.photos/seed/${post.slug}/800/450`}
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 shadow-sm">
+                      {post.category}
+                    </span>
+                  </div>
+                </Link>
+                <div className="p-8 flex-1 flex flex-col">
+                  <Link to={`/blog/${post.slug}`}>
+                    <h4 className="text-xl font-black text-zinc-900 mb-4 group-hover:text-indigo-600 transition-colors font-display leading-tight">
+                      {post.title}
+                    </h4>
+                  </Link>
+                  <p className="text-zinc-500 text-sm line-clamp-2 mb-6 flex-1">
+                    {post.excerpt}
+                  </p>
+                  <Link
+                    to={`/blog/${post.slug}`}
+                    className="inline-flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-widest group/link"
+                  >
+                    Read More
+                    <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </motion.article>
+            ))
+          ) : (
+            [1, 2, 3].map((i) => (
+              <div key={i} className="bg-zinc-100 animate-pulse rounded-[2.5rem] aspect-[4/5]" />
+            ))
+          )}
+        </div>
+        
+        <Link to="/blog" className="sm:hidden mt-8 flex items-center justify-center gap-2 bg-zinc-900 text-white py-4 rounded-full font-black text-xs uppercase tracking-widest">
+          View All Posts <ChevronRight size={16} />
+        </Link>
       </section>
 
       {/* Supporter Shop CTA */}

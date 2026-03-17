@@ -18,6 +18,7 @@ import {
   Legend
 } from 'recharts';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Trophy, MapPin, Globe, Loader2, Database, Trash2, ArrowLeft, Vote, Users, ChevronRight, Share2, Twitter, Facebook, MessageCircle, RefreshCw, Zap, TrendingUp } from 'lucide-react';
 import { clearAllData, subscribeToOverallResults, getDistrictResults } from '../services/voteService';
 
@@ -161,6 +162,13 @@ const ResultsPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 space-y-8 sm:space-y-12">
+      <Helmet>
+        <title>Live Election Trends | Tamil Pulse 2026 Results</title>
+        <meta name="description" content="View real-time election trends and community pulse results for the 2026 Tamil Nadu Assembly Elections. See which parties are leading across 38 districts." />
+        <meta property="og:title" content="Live Election Trends | Tamil Pulse 2026 Results" />
+        <meta property="og:description" content="View real-time election trends and community pulse results for the 2026 Tamil Nadu Assembly Elections. See which parties are leading across 38 districts." />
+        <meta property="og:url" content={`${window.location.origin}/results`} />
+      </Helmet>
       {/* Header Section - More Compact */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-2">

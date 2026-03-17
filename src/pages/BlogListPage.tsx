@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { BookOpen, Clock, User, ArrowRight, Loader2, Calendar } from 'lucide-react';
 import { getBlogPosts, BlogPost } from '../services/voteService';
 
@@ -31,6 +32,15 @@ const BlogListPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-zinc-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <Helmet>
+        <title>Political Analysis & Insights | TN Pulse 2026 Blog</title>
+        <meta name="description" content="Deep dives, expert analysis, and community stories about the 2026 Tamil Nadu Legislative Assembly elections." />
+        <meta property="og:title" content="Political Analysis & Insights | TN Pulse 2026 Blog" />
+        <meta property="og:description" content="Deep dives, expert analysis, and community stories about the 2026 Tamil Nadu Legislative Assembly elections." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10 sm:mb-16">
           <motion.div

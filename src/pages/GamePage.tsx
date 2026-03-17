@@ -12,10 +12,22 @@ import {
   Zap,
   Target,
   MessageCircle,
-  Twitter
+  Twitter,
+  Users,
+  Copy,
+  Check
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import confetti from 'canvas-confetti';
+import { 
+  createChallenge, 
+  submitChallengeScore, 
+  subscribeToChallengeScores, 
+  getChallenge,
+  ChallengeScore,
+  GameChallenge
+} from '../services/voteService';
 
 interface Question {
   id: number;
@@ -99,12 +111,29 @@ const questions: Question[] = [
 ];
 
 const GamePage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const challengeId = searchParams.get('challengeId');
+
   const [gameState, setGameState] = useState<'start' | 'playing' | 'finished'>('start');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
+  
+  const [nickname, setNickname] = useState(localStorage.getItem('tn_pulse_nickname') || '');
+  const [isCreatingChallenge, setIsCreatingChallenge] = useState(false);
+  const [activeChallenge, setActiveChallenge] = useState<GameChallenge | null>(null);
+  const [challengeScores, setChallengeScores] = useState<ChallengeScore[]>([]);
+  const [isCopied, setIsCopied] = useState(false);
+
+  useEffect(() => {
+    if (challengeId) {
+      getChallenge(challengeId).then(setActiveChallenge).catch(console.error);
+      const unsubscribe = subscribeToChallengeScores(challengeId, setChallengeScores);
+      return () => unsubscribe();
+    }
+  }, [challengeId]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -117,6 +146,11 @@ const GamePage: React.FC = () => {
   }, [timeLeft, gameState, isAnswered]);
 
   const startGame = () => {
+    if (!nickname.trim()) {
+      alert("Please enter a nickname to start!");
+      return;
+    }
+    localStorage.setItem('tn_pulse_nickname', nickname);
     setGameState('playing');
     setCurrentQuestionIndex(0);
     setScore(0);
@@ -135,7 +169,7 @@ const GamePage: React.FC = () => {
     }
   };
 
-  const nextQuestion = () => {
+  const nextQuestion = async () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedOption(null);
@@ -143,6 +177,12 @@ const GamePage: React.FC = () => {
       setTimeLeft(15);
     } else {
       setGameState('finished');
+      
+      // If in a challenge, submit score
+      if (challengeId) {
+        await submitChallengeScore(challengeId, nickname, score);
+      }
+
       if (score >= 7) {
         confetti({
           particleCount: 150,
@@ -160,15 +200,44 @@ const GamePage: React.FC = () => {
     return { title: "Grassroots Observer", color: "text-zinc-500", icon: <RefreshCw size={48} /> };
   };
 
+  const handleCreateChallenge = async () => {
+    setIsCreatingChallenge(true);
+    try {
+      const id = await createChallenge(nickname);
+      await submitChallengeScore(id, nickname, score);
+      window.location.href = `/game?challengeId=${id}`;
+    } catch (error) {
+      console.error(error);
+      setIsCreatingChallenge(false);
+    }
+  };
+
+  const copyLink = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   const shareScore = () => {
     const rank = getRank();
-    const text = `I scored ${score}/10 in the TN Political IQ Quiz and earned the rank of ${rank.title}! Can you beat me? 🗳️🔥 #TNPulse2026 #TamilNadu`;
-    const url = window.location.origin + '/game';
+    let text = `I scored ${score}/10 in the TN Mastermind Challenge and earned the rank of ${rank.title}! 🗳️🔥`;
+    if (challengeId) {
+      text = `I'm currently on the leaderboard for the TN Mastermind Challenge with ${score}/10! Can you beat me? 🗳️🔥`;
+    }
+    const url = window.location.href;
     window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
   };
 
   return (
     <div className="min-h-screen bg-[#E4E3E0] pt-24 sm:pt-32 pb-12 sm:pb-20 px-4">
+      <Helmet>
+        <title>TN Mastermind Challenge | Tamil Pulse 2026 Quiz</title>
+        <meta name="description" content="Test your knowledge of Tamil Nadu politics! Play the TN Mastermind Challenge, invite your friends, and top the leaderboard." />
+        <meta property="og:title" content="TN Mastermind Challenge | Tamil Pulse 2026 Quiz" />
+        <meta property="og:description" content="Test your knowledge of Tamil Nadu politics! Play the TN Mastermind Challenge, invite your friends, and top the leaderboard." />
+        <meta property="og:url" content={`${window.location.origin}/game`} />
+      </Helmet>
       <div className="max-w-3xl mx-auto">
         <AnimatePresence mode="wait">
           {gameState === 'start' && (
@@ -183,13 +252,37 @@ const GamePage: React.FC = () => {
                 <Target size={40} className="sm:w-12 sm:h-12" />
               </div>
               <div className="space-y-4">
-                <h1 className="text-4xl sm:text-6xl font-black text-zinc-900 font-display tracking-tighter leading-none">
-                  Political <span className="text-[#046A38]">IQ Quiz</span>
-                </h1>
+                {challengeId && activeChallenge ? (
+                  <>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100 mb-2">
+                      <Users size={12} /> Challenged by {activeChallenge.creatorNickname}
+                    </div>
+                    <h1 className="text-4xl sm:text-6xl font-black text-zinc-900 font-display tracking-tighter leading-none">
+                      TN Mastermind <span className="text-[#046A38]">Challenge</span>
+                    </h1>
+                  </>
+                ) : (
+                  <h1 className="text-4xl sm:text-6xl font-black text-zinc-900 font-display tracking-tighter leading-none">
+                    Political <span className="text-[#046A38]">IQ Quiz</span>
+                  </h1>
+                )}
                 <p className="text-zinc-500 text-base sm:text-lg font-medium max-w-md mx-auto">
-                  Test your knowledge of Tamil Nadu's political history and current affairs. Earn your rank and share it with the community!
+                  Test your knowledge of Tamil Nadu's political history and current affairs. Earn your rank and challenge your friends!
                 </p>
               </div>
+
+              {/* Nickname Input */}
+              <div className="max-w-sm mx-auto space-y-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-left pl-4">Enter Your Nickname</p>
+                <input 
+                  type="text"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value.slice(0, 15))}
+                  placeholder="e.g. TN_Warrior"
+                  className="w-full px-6 py-4 rounded-2xl bg-zinc-50 border border-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#046A38]/20 focus:border-[#046A38] font-black text-zinc-900 transition-all"
+                />
+              </div>
+
               <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-sm mx-auto">
                 <div className="p-3 sm:p-4 bg-zinc-50 rounded-xl sm:rounded-2xl border border-zinc-100">
                   <p className="text-xl sm:text-2xl font-black text-zinc-900">10</p>
@@ -204,11 +297,31 @@ const GamePage: React.FC = () => {
                   <p className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-zinc-400">Rewards</p>
                 </div>
               </div>
+
+              {challengeId && challengeScores.length > 0 && (
+                <div className="max-w-sm mx-auto bg-zinc-50 rounded-3xl p-6 border border-zinc-100">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4">Challenge Leaderboard</h3>
+                  <div className="space-y-3">
+                    {challengeScores.map((s, i) => (
+                      <div key={s.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${i === 0 ? 'bg-amber-100 text-amber-600' : 'bg-zinc-200 text-zinc-600'}`}>
+                            {i + 1}
+                          </span>
+                          <span className="text-sm font-black text-zinc-900">{s.nickname}</span>
+                        </div>
+                        <span className="text-sm font-black text-[#046A38]">{s.score}/10</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <button 
                 onClick={startGame}
                 className="w-full bg-zinc-900 text-white py-5 sm:py-6 rounded-full font-black text-lg sm:text-xl shadow-2xl hover:bg-zinc-800 transition-all active:scale-95 flex items-center justify-center gap-3"
               >
-                Start Challenge
+                {challengeId ? 'Accept Challenge' : 'Start Challenge'}
                 <ChevronRight size={20} className="sm:w-6 sm:h-6" />
               </button>
               <Link to="/" className="block text-zinc-400 font-black text-[10px] uppercase tracking-widest hover:text-zinc-900 transition-colors">
@@ -323,28 +436,71 @@ const GamePage: React.FC = () => {
                     {getRank().icon}
                   </div>
                 </div>
-                <h2 className="text-2xl sm:text-4xl font-black text-zinc-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-display">Quiz Complete</h2>
+                <h2 className="text-2xl sm:text-4xl font-black text-zinc-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-display">
+                  {challengeId ? 'Challenge Complete' : 'Quiz Complete'}
+                </h2>
                 <div className="space-y-2">
                   <p className="text-6xl sm:text-8xl font-black text-zinc-900 tracking-tighter font-display leading-none">{score}<span className="text-zinc-300">/10</span></p>
                   <p className={`text-xl sm:text-2xl font-black uppercase tracking-widest ${getRank().color}`}>{getRank().title}</p>
                 </div>
               </div>
 
+              {challengeId && challengeScores.length > 0 && (
+                <div className="max-w-sm mx-auto bg-zinc-50 rounded-3xl p-6 border border-zinc-100 relative z-10">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4">Friend Leaderboard</h3>
+                  <div className="space-y-3">
+                    {challengeScores.map((s, i) => (
+                      <div key={s.id} className={`flex items-center justify-between p-2 rounded-xl ${s.nickname === nickname ? 'bg-emerald-50 ring-1 ring-emerald-200' : ''}`}>
+                        <div className="flex items-center gap-3">
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${i === 0 ? 'bg-amber-100 text-amber-600' : 'bg-zinc-200 text-zinc-600'}`}>
+                            {i + 1}
+                          </span>
+                          <span className="text-sm font-black text-zinc-900">{s.nickname} {s.nickname === nickname && '(You)'}</span>
+                        </div>
+                        <span className="text-sm font-black text-[#046A38]">{s.score}/10</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 relative z-10">
-                <button
-                  onClick={shareScore}
-                  className="bg-[#25D366] text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl shadow-green-100"
-                >
-                  <MessageCircle size={20} className="sm:w-6 sm:h-6" />
-                  Share on WhatsApp
-                </button>
-                <button
-                  onClick={startGame}
-                  className="bg-zinc-900 text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-100"
-                >
-                  <RefreshCw size={20} className="sm:w-6 sm:h-6" />
-                  Try Again
-                </button>
+                {challengeId ? (
+                  <>
+                    <button
+                      onClick={shareScore}
+                      className="bg-[#25D366] text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-xl shadow-green-100"
+                    >
+                      <MessageCircle size={20} className="sm:w-6 sm:h-6" />
+                      Invite More Friends
+                    </button>
+                    <button
+                      onClick={copyLink}
+                      className="bg-zinc-900 text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-100"
+                    >
+                      {isCopied ? <Check size={20} /> : <Copy size={20} />}
+                      {isCopied ? 'Link Copied!' : 'Copy Challenge Link'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleCreateChallenge}
+                      disabled={isCreatingChallenge}
+                      className="bg-[#046A38] text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-[#03552d] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50"
+                    >
+                      {isCreatingChallenge ? <RefreshCw size={20} className="animate-spin" /> : <Users size={20} />}
+                      Challenge Friends
+                    </button>
+                    <button
+                      onClick={shareScore}
+                      className="bg-zinc-900 text-white py-4 sm:py-5 rounded-full font-black text-base sm:text-lg flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-100"
+                    >
+                      <Share2 size={20} className="sm:w-6 sm:h-6" />
+                      Share Result
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="pt-6 sm:pt-8 border-t border-zinc-100 flex flex-col items-center gap-4 sm:gap-6 relative z-10">

@@ -77,6 +77,20 @@ export interface BlogPost {
   views: number;
 }
 
+export interface GameChallenge {
+  id: string;
+  creatorNickname: string;
+  timestamp: any;
+  scores: ChallengeScore[];
+}
+
+export interface ChallengeScore {
+  id: string;
+  nickname: string;
+  score: number;
+  timestamp: any;
+}
+
 const DEVICE_ID_KEY = 'tn_2026_device_id';
 const VOTE_FLAG_KEY = 'tn_2026_voted';
 
@@ -312,6 +326,13 @@ export const getBlogPosts = async (): Promise<BlogPost[]> => {
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
 };
 
+export const getLatestBlogPosts = async (count: number = 3): Promise<BlogPost[]> => {
+  const blogRef = collection(db, 'blog_posts');
+  const q = query(blogRef, orderBy('timestamp', 'desc'), limit(count));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+};
+
 export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
   const blogRef = collection(db, 'blog_posts');
   const q = query(blogRef, where('slug', '==', slug), limit(1));
@@ -330,10 +351,71 @@ export const postBlogPost = async (post: Omit<BlogPost, 'id' | 'timestamp' | 'vi
   });
 };
 
+export const updateBlogPost = async (id: string, post: Partial<BlogPost>) => {
+  const blogRef = doc(db, 'blog_posts', id);
+  await updateDoc(blogRef, {
+    ...post,
+    lastUpdated: serverTimestamp()
+  });
+};
+
 export const incrementBlogViews = async (id: string) => {
   const blogRef = doc(db, 'blog_posts', id);
   await updateDoc(blogRef, {
     views: increment(1)
+  });
+};
+
+// --- Game Challenges ---
+export const createChallenge = async (nickname: string) => {
+  const challengesRef = collection(db, 'challenges');
+  const docRef = await addDoc(challengesRef, {
+    creatorNickname: nickname,
+    timestamp: serverTimestamp()
+  });
+  return docRef.id;
+};
+
+export const getChallenge = async (challengeId: string): Promise<GameChallenge> => {
+  const challengeRef = doc(db, 'challenges', challengeId);
+  const challengeDoc = await getDoc(challengeRef);
+  
+  if (!challengeDoc.exists()) throw new Error('Challenge not found');
+  
+  const scoresRef = collection(db, 'challenges', challengeId, 'scores');
+  const q = query(scoresRef, orderBy('score', 'desc'), orderBy('timestamp', 'asc'), limit(10));
+  const scoresSnapshot = await getDocs(q);
+  
+  const scores = scoresSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  } as ChallengeScore));
+
+  return {
+    id: challengeDoc.id,
+    ...challengeDoc.data(),
+    scores
+  } as GameChallenge;
+};
+
+export const submitChallengeScore = async (challengeId: string, nickname: string, score: number) => {
+  const scoresRef = collection(db, 'challenges', challengeId, 'scores');
+  await addDoc(scoresRef, {
+    nickname,
+    score,
+    timestamp: serverTimestamp()
+  });
+};
+
+export const subscribeToChallengeScores = (challengeId: string, callback: (scores: ChallengeScore[]) => void) => {
+  const scoresRef = collection(db, 'challenges', challengeId, 'scores');
+  const q = query(scoresRef, orderBy('score', 'desc'), orderBy('timestamp', 'asc'), limit(10));
+  return onSnapshot(q, (snapshot) => {
+    const scores = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as ChallengeScore));
+    callback(scores);
   });
 };
 

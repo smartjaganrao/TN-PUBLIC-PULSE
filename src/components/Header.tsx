@@ -26,6 +26,7 @@ const Header: React.FC = () => {
     { path: '/pulse', label: 'Community Pulse' },
     { path: '/forum', label: 'Debate' },
     { path: '/game', label: 'Quiz' },
+    { path: '/blog', label: 'Blog' },
     { path: '/shop', label: 'Supporter Shop' },
   ];
 
@@ -175,7 +176,7 @@ const Header: React.FC = () => {
                 Switch to {language === 'en' ? 'தமிழ்' : 'English'}
               </button>
               <p className="text-center text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mt-8">
-                © 2026 Tamil Nadu Public Pulse
+                © 2026 Tamil Pulse
               </p>
             </div>
           </motion.div>

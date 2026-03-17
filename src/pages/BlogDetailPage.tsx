@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, User, Clock, Share2, Eye, Loader2, BookOpen } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import Markdown from 'react-markdown';
 import { getBlogPostBySlug, BlogPost, incrementBlogViews } from '../services/voteService';
 
@@ -60,9 +61,31 @@ const BlogDetailPage: React.FC = () => {
   }
 
   if (!post) return null;
+  
+  const canonicalUrl = `${window.location.origin}/blog/${post.slug}`;
 
   return (
     <div className="min-h-screen bg-zinc-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <Helmet>
+        <title>{post.title} | TN Pulse 2026 Blog</title>
+        <meta name="description" content={post.excerpt} />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={post.excerpt} />
+        <meta property="og:image" content={post.imageUrl} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content={post.title} />
+        <meta property="twitter:description" content={post.excerpt} />
+        <meta property="twitter:image" content={post.imageUrl} />
+      </Helmet>
+
       <div className="max-w-4xl mx-auto">
         <Link
           to="/blog"

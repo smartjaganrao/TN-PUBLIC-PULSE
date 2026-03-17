@@ -2,12 +2,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Swords, ArrowLeft, TrendingUp, Zap, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import CommentSection from '../components/CommentSection';
 import BattleArena from '../components/BattleArena';
 
 const PulsePage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 space-y-12 sm:space-y-20">
+      <Helmet>
+        <title>Community Pulse | Tamil Pulse 2026 Battle Arena</title>
+        <meta name="description" content="Join the live political discourse in Tamil Nadu. Discuss, debate, and share your views in the Tamil Pulse Battle Arena." />
+        <meta property="og:title" content="Community Pulse | Tamil Pulse 2026 Battle Arena" />
+        <meta property="og:description" content="Join the live political discourse in Tamil Nadu. Discuss, debate, and share your views in the Tamil Pulse Battle Arena." />
+        <meta property="og:url" content={`${window.location.origin}/pulse`} />
+      </Helmet>
       {/* Header Section */}
       <div className="flex flex-col items-center text-center space-y-6">
         <motion.div

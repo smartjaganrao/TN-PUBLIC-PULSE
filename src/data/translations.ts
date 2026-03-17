@@ -1,7 +1,7 @@
 export const translations = {
   en: {
-    title: "Tamil Public Pulse",
-    subtitle: "Your Voice, Our Community",
+    title: "Tamil Pulse",
+    subtitle: "The People's Voice",
     disclaimer: "This platform is a community-driven public opinion hub created for social trends and community discussion. It is NOT an official government tool and is NOT affiliated with any government body.",
     startVoting: "Polls",
     viewResults: "Trends",
@@ -17,7 +17,7 @@ export const translations = {
     confirmVote: "Submit My Opinion",
     alreadyVoted: "You have already shared your opinion on this topic.",
     voteSuccess: "Thank you for sharing your voice!",
-    shareMessage: "I shared my opinion on Tamil Public Pulse! Check the community trends in your district 👇",
+    shareMessage: "I shared my opinion on Tamil Pulse! Check the community trends in your district 👇",
     overallResults: "Tamil Nadu Overall Trends",
     districtResults: "District-wise Results",
     leadingParty: "Leading Party",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Plus, MessageCircle, ThumbsUp, User, Clock, ChevronRight, ArrowLeft, Loader2, Filter, Send, TrendingUp, Award, Zap, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '../context/LanguageContext';
 import { subscribeToForumTopics, postForumTopic, upvoteForumTopic, ForumTopic } from '../services/voteService';
@@ -66,6 +67,13 @@ const ForumPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-16 space-y-16 relative">
+      <Helmet>
+        <title>Political Forum | Tamil Pulse 2026 Discussions</title>
+        <meta name="description" content="Engage in deep political discussions about Tamil Nadu's future. Start a topic, share your insights, and connect with other voters." />
+        <meta property="og:title" content="Political Forum | Tamil Pulse 2026 Discussions" />
+        <meta property="og:description" content="Engage in deep political discussions about Tamil Nadu's future. Start a topic, share your insights, and connect with other voters." />
+        <meta property="og:url" content={`${window.location.origin}/forum`} />
+      </Helmet>
       {/* Background Decorative Elements */}
       <div className="absolute top-0 right-0 -z-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 -z-10 w-64 h-64 bg-[#046A38]/5 rounded-full blur-[100px] pointer-events-none" />

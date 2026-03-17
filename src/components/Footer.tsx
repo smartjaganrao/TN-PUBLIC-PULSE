@@ -50,6 +50,10 @@ const Footer: React.FC = () => {
                 People's Manifesto
                 <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </Link>
+              <Link to="/blog" className="text-sm hover:text-white transition-colors flex items-center gap-2 group">
+                Blog
+                <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
               <Link to="/shop" className="text-sm hover:text-white transition-colors flex items-center gap-2 group">
                 Supporter Shop
                 <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -73,9 +77,9 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
           <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 md:gap-6 text-[10px] font-black uppercase tracking-widest">
-            <span className="text-zinc-600 w-full md:w-auto mb-2 md:mb-0">© 2026 TN Public Pulse</span>
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <span className="text-zinc-600 w-full md:w-auto mb-2 md:mb-0">© 2026 Tamil Pulse</span>
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
             <Link to="/admin" className="text-zinc-800 hover:text-zinc-600 transition-colors">Admin</Link>
           </div>
           <div className="text-[10px] font-black uppercase tracking-widest text-zinc-600">

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, BookOpen, Zap, Shield, ExternalLink, ArrowLeft, Star, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 interface AffiliateProduct {
   id: string;
@@ -110,6 +111,13 @@ const products: AffiliateProduct[] = [
 const AffiliatePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-zinc-50 pb-20">
+      <Helmet>
+        <title>Supporter Shop | Tamil Pulse 2026 Political Gear & Books</title>
+        <meta name="description" content="Browse our curated selection of political history books, supporter gear, and essentials for the 2026 Tamil Nadu elections." />
+        <meta property="og:title" content="Supporter Shop | Tamil Pulse 2026 Political Gear & Books" />
+        <meta property="og:description" content="Browse our curated selection of political history books, supporter gear, and essentials for the 2026 Tamil Nadu elections." />
+        <meta property="og:url" content={`${window.location.origin}/shop`} />
+      </Helmet>
       {/* Hero Section */}
       <div className="bg-zinc-900 text-white pt-20 pb-32 px-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[120px] -mr-48 -mt-48" />

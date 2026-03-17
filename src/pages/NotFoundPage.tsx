@@ -1,10 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Home, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 const NotFoundPage: React.FC = () => {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <Helmet>
+        <title>Page Not Found | Tamil Pulse 2026</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="max-w-md w-full text-center space-y-8">
         <div className="relative">
           <div className="text-[12rem] font-black text-zinc-100 font-display leading-none select-none">

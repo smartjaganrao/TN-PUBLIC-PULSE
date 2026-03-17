@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { 
   LayoutDashboard, 
   Vote, 
@@ -20,12 +21,13 @@ import {
   Image as ImageIcon,
   Type,
   X,
-  BookOpen
+  BookOpen,
+  Edit2
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { getAllVotes, getAllComments, deleteDocument, getForumTopics, getBlogPosts, postBlogPost } from '../services/voteService';
+import { getAllVotes, getAllComments, deleteDocument, getForumTopics, getBlogPosts, postBlogPost, updateBlogPost } from '../services/voteService';
 import { parties } from '../data/parties';
 
 const AdminPage: React.FC = () => {
@@ -47,6 +49,7 @@ const AdminPage: React.FC = () => {
   const [blogImageUrl, setBlogImageUrl] = useState('');
   const [submittingBlog, setSubmittingBlog] = useState(false);
   const [blogEditorTab, setBlogEditorTab] = useState<'write' | 'preview'>('write');
+  const [editingPost, setEditingPost] = useState<any | null>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,7 +100,7 @@ const AdminPage: React.FC = () => {
     e.preventDefault();
     setSubmittingBlog(true);
     try {
-      await postBlogPost({
+      const postData = {
         title: blogTitle,
         slug: blogSlug.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
         content: blogContent,
@@ -105,8 +108,16 @@ const AdminPage: React.FC = () => {
         author: blogAuthor,
         category: blogCategory,
         imageUrl: blogImageUrl
-      });
+      };
+
+      if (editingPost) {
+        await updateBlogPost(editingPost.id, postData);
+      } else {
+        await postBlogPost(postData);
+      }
+
       setShowAddBlog(false);
+      setEditingPost(null);
       setBlogTitle('');
       setBlogSlug('');
       setBlogContent('');
@@ -117,10 +128,22 @@ const AdminPage: React.FC = () => {
       fetchData();
     } catch (e) {
       console.error(e);
-      alert('Failed to add blog post');
+      alert('Failed to save blog post');
     } finally {
       setSubmittingBlog(false);
     }
+  };
+
+  const handleEditBlog = (post: any) => {
+    setEditingPost(post);
+    setBlogTitle(post.title);
+    setBlogSlug(post.slug);
+    setBlogContent(post.content);
+    setBlogExcerpt(post.excerpt);
+    setBlogAuthor(post.author);
+    setBlogCategory(post.category);
+    setBlogImageUrl(post.imageUrl);
+    setShowAddBlog(true);
   };
 
   const filteredData = data.filter(item => {
@@ -194,6 +217,10 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#E4E3E0] font-sans text-[#141414]">
+      <Helmet>
+        <title>Admin Dashboard | Tamil Pulse 2026</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Mobile Header */}
       <div className="lg:hidden bg-white border-b border-[#141414]/10 p-4 sticky top-0 z-50 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -417,12 +444,22 @@ const AdminPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-4 sm:px-8 py-4 sm:py-6 text-right">
-                        <button 
-                          onClick={() => handleDelete(item.id)}
-                          className="p-2 sm:p-3 text-rose-500 hover:bg-rose-50 rounded-lg sm:rounded-xl transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-                        >
-                          <Trash2 size={14} className="sm:w-4 sm:h-4" />
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          {activeTab === 'blog' && (
+                            <button 
+                              onClick={() => handleEditBlog(item)}
+                              className="p-2 sm:p-3 text-indigo-500 hover:bg-indigo-50 rounded-lg sm:rounded-xl transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                            >
+                              <Edit2 size={14} className="sm:w-4 sm:h-4" />
+                            </button>
+                          )}
+                          <button 
+                            onClick={() => handleDelete(item.id)}
+                            className="p-2 sm:p-3 text-rose-500 hover:bg-rose-50 rounded-lg sm:rounded-xl transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                          >
+                            <Trash2 size={14} className="sm:w-4 sm:h-4" />
+                          </button>
+                        </div>
                       </td>
                     </motion.tr>
                   ))}
@@ -461,11 +498,18 @@ const AdminPage: React.FC = () => {
             >
               <div className="p-6 sm:p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter font-display">Create New Blog Post</h2>
-                  <p className="text-zinc-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1">Publish political analysis to the public pulse</p>
+                  <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter font-display">
+                    {editingPost ? 'Edit Blog Post' : 'Create New Blog Post'}
+                  </h2>
+                  <p className="text-zinc-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-1">
+                    {editingPost ? 'Update your political analysis' : 'Publish political analysis to the public pulse'}
+                  </p>
                 </div>
                 <button 
-                  onClick={() => setShowAddBlog(false)}
+                  onClick={() => {
+                    setShowAddBlog(false);
+                    setEditingPost(null);
+                  }}
                   className="p-2 sm:p-3 bg-white border border-zinc-200 rounded-xl sm:rounded-2xl text-zinc-400 hover:text-rose-500 transition-all"
                 >
                   <X size={18} className="sm:w-5 sm:h-5" />
@@ -612,7 +656,7 @@ const AdminPage: React.FC = () => {
                     disabled={submittingBlog}
                     className="order-1 sm:order-2 bg-[#141414] text-white px-8 sm:px-12 py-3 sm:py-4 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-200 disabled:opacity-50"
                   >
-                    {submittingBlog ? 'Publishing...' : 'Publish Post'}
+                    {submittingBlog ? 'Saving...' : editingPost ? 'Update Post' : 'Publish Post'}
                   </button>
                 </div>
               </form>

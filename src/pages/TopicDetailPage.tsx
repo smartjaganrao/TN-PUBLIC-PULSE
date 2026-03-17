@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, User, Clock, ThumbsUp, Send, Loader2, MessageCircle, Share2, Flag, MoreHorizontal, Image as ImageIcon, Link as LinkIcon, Type } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -88,6 +89,13 @@ const TopicDetailPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-16 space-y-16 relative">
+      <Helmet>
+        <title>{topic.title} | Tamil Pulse Forum</title>
+        <meta name="description" content={topic.content.substring(0, 160)} />
+        <meta property="og:title" content={`${topic.title} | Tamil Pulse Forum`} />
+        <meta property="og:description" content={topic.content.substring(0, 160)} />
+        <meta property="og:url" content={`${window.location.origin}/forum/topic/${topic.id}`} />
+      </Helmet>
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 -z-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
       
