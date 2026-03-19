@@ -62,33 +62,24 @@ const Header: React.FC = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 ${
-        mobileMenuOpen
-          ? 'h-screen bg-white'
-          : isScrolled 
-            ? 'py-3 bg-white/95 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-b border-zinc-100' 
-            : isHomePage 
-              ? 'py-6 bg-transparent text-white max-lg:bg-white max-lg:text-zinc-900 max-lg:py-4 max-lg:shadow-sm'
-              : 'py-4 bg-white text-zinc-900 border-b border-zinc-100'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+        isScrolled 
+          ? 'py-3 bg-white shadow-lg text-zinc-900 border-b border-zinc-200' 
+          : isHomePage 
+            ? 'py-6 bg-transparent text-white max-lg:bg-white max-lg:text-zinc-900 max-lg:py-4 max-lg:shadow-sm'
+            : 'py-4 bg-white text-zinc-900 border-b border-zinc-100'
+      } ${mobileMenuOpen ? 'bg-white shadow-none border-transparent' : ''}`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-        <div className={`flex justify-between items-center h-full ${mobileMenuOpen ? 'border-b border-zinc-100' : ''}`}>
-          <Link to="/" className="flex items-center gap-4 group relative" onClick={() => setMobileMenuOpen(false)}>
-            <div className="relative">
-              <img 
-                src="/logo.png" 
-                alt="Tamil Pulse Logo" 
-                className={`transition-all duration-500 object-contain ${
-                  mobileMenuOpen ? 'h-12' : isScrolled ? 'h-10' : 'h-12 sm:h-20 lg:h-32'
-                }`}
-                referrerPolicy="no-referrer"
-              />
-              {!isScrolled && !mobileMenuOpen && (
-                <div className="absolute -inset-2 bg-gradient-to-tr from-emerald-500/10 to-indigo-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              )}
-            </div>
-            {(location.pathname === '/results' || location.pathname === '/') && !mobileMenuOpen && (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center">
+          <Link to="/" className="flex items-center gap-4 group relative">
+            <img 
+              src="/logo.png" 
+              alt="Tamil Pulse Logo" 
+              className="h-12 sm:h-20 lg:h-32 w-auto object-contain transition-all duration-500"
+              referrerPolicy="no-referrer"
+            />
+            {(location.pathname === '/results' || location.pathname === '/') && (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -138,21 +129,15 @@ const Header: React.FC = () => {
 
           {/* Mobile Toggle */}
           <div className="flex items-center gap-3 lg:hidden">
-            {!mobileMenuOpen && (
-              <button
-                onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
-                className="p-2.5 rounded-xl bg-zinc-100 text-zinc-900 transition-colors"
-              >
-                <Languages size={20} />
-              </button>
-            )}
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
+              className="p-2.5 rounded-xl bg-zinc-100 text-zinc-900 transition-colors"
+            >
+              <Languages size={20} />
+            </button>
             <button 
-              className={`p-3 rounded-2xl transition-all active:scale-95 touch-manipulation ${
-                mobileMenuOpen 
-                  ? 'bg-zinc-100 text-zinc-900' 
-                  : (isScrolled || !isHomePage) 
-                    ? 'bg-zinc-100 text-zinc-900' 
-                    : 'bg-white/10 text-white max-lg:bg-zinc-100 max-lg:text-zinc-900'
+              className={`p-2.5 rounded-xl transition-colors ${
+                (isScrolled || !isHomePage) ? 'bg-zinc-100 text-zinc-900' : 'bg-white/10 text-white max-lg:bg-zinc-100 max-lg:text-zinc-900'
               }`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -162,16 +147,33 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Content */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute top-full left-0 right-0 h-[calc(100vh-100%)] bg-white lg:hidden flex flex-col overflow-hidden"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed inset-0 z-[200] bg-white lg:hidden flex flex-col"
           >
-            <div className="flex-1 px-6 py-8 flex flex-col gap-2 overflow-y-auto no-scrollbar">
+            <div className={`flex justify-between items-center px-4 border-b border-zinc-100 transition-all duration-300 ${isScrolled ? 'h-[72px]' : 'h-[88px]'}`}>
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3">
+                <img 
+                  src="/logo.png" 
+                  alt="Tamil Pulse Logo" 
+                  className="h-12 w-auto object-contain"
+                  referrerPolicy="no-referrer"
+                />
+              </Link>
+              <button 
+                className="p-2.5 rounded-xl bg-zinc-100 text-zinc-900 active:scale-95 transition-all"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex-1 px-6 py-8 flex flex-col gap-2 overflow-y-auto">
               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4">
                 Navigation
               </p>
