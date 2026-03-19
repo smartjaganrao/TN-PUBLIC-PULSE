@@ -100,11 +100,7 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 sm:mb-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em]">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-              {visitorCount.toLocaleString()} Live Visitors
-            </div>
-            <h2 className="text-5xl sm:text-8xl lg:text-[10rem] font-black mb-8 tracking-tighter leading-[0.85] sm:leading-[0.8] font-display">
+            <h2 className="text-4xl sm:text-7xl lg:text-8xl font-black mb-8 tracking-tighter leading-[0.9] sm:leading-[0.8] font-display">
               VOTE.<br />
               <span className="text-emerald-400">TREND.</span><br />
               SHARE.
@@ -124,6 +120,19 @@ const HomePage: React.FC = () => {
             </div>
           </motion.div>
         </div>
+        
+        {/* Live Status Bar - Top of Hero */}
+        <div className="absolute top-0 left-0 right-0 py-3 bg-black/10 backdrop-blur-sm border-b border-white/5 flex justify-center items-center gap-6 text-[9px] font-black uppercase tracking-[0.3em] text-white/60 z-20">
+          <div className="flex items-center gap-2">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Live Pulse: {visitorCount.toLocaleString()} Active</span>
+          </div>
+          <div className="w-1 h-1 rounded-full bg-white/20" />
+          <div className="flex items-center gap-2">
+            <Users size={12} className="text-white/40" />
+            <span>Total Participation: {totalVotes.toLocaleString()}</span>
+          </div>
+        </div>
       </section>
 
       {/* Live Pulse Banner - Real-time Graph */}
@@ -142,7 +151,7 @@ const HomePage: React.FC = () => {
           <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] -mr-48 -mt-48" />
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="space-y-4 text-center md:text-left">
-              <h3 className="text-3xl sm:text-5xl font-black font-display tracking-tight">Make it <span className="text-emerald-400">Viral.</span></h3>
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display tracking-tight">Make it <span className="text-emerald-400">Viral.</span></h3>
               <p className="text-zinc-400 text-sm sm:text-lg max-w-md font-medium">
                 The more people share, the more accurate the pulse. Invite your friends and let's show the world what the youth of TN thinks!
               </p>
@@ -181,7 +190,7 @@ const HomePage: React.FC = () => {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-[#046A38] text-[10px] font-black uppercase tracking-widest">
                 <Target size={12} /> Action Required
               </div>
-              <h3 className="text-4xl sm:text-6xl font-black font-display tracking-tighter leading-none text-zinc-900">
+              <h3 className="text-3xl sm:text-5xl lg:text-6xl font-black font-display tracking-tighter leading-none text-zinc-900">
                 SHARE YOUR <span className="text-[#046A38]">VOICE.</span>
               </h3>
               <p className="text-zinc-500 font-bold text-lg">
@@ -210,8 +219,13 @@ const HomePage: React.FC = () => {
               <div className="p-3 bg-zinc-50 rounded-2xl border border-zinc-100">
                 <Users size={24} className="text-zinc-400" />
               </div>
-              <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
+              <div className="flex flex-col items-end">
+                <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
+                </div>
+                <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-1">
+                  {visitorCount.toLocaleString()} Active
+                </div>
               </div>
             </div>
             <h4 className="text-zinc-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Total Participation</h4>
@@ -238,7 +252,7 @@ const HomePage: React.FC = () => {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest">
                 <Trophy size={14} className="text-amber-400" /> Community Challenge
               </div>
-              <h3 className="text-4xl sm:text-6xl font-black font-display tracking-tighter leading-none">
+              <h3 className="text-3xl sm:text-5xl lg:text-6xl font-black font-display tracking-tighter leading-none">
                 TN MASTERMIND <span className="text-amber-400">CHALLENGE.</span>
               </h3>
               <p className="text-zinc-400 text-sm sm:text-xl font-medium max-w-xl">
@@ -261,7 +275,7 @@ const HomePage: React.FC = () => {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-widest">
                 <MessageSquare size={14} /> Live Interaction
               </div>
-              <h3 className="text-4xl sm:text-7xl font-black font-display tracking-tighter leading-none">
+              <h3 className="text-3xl sm:text-6xl lg:text-7xl font-black font-display tracking-tighter leading-none">
                 COMMUNITY <span className="text-indigo-300">PULSE.</span>
               </h3>
               <p className="text-indigo-100 text-sm sm:text-xl font-medium max-w-xl">

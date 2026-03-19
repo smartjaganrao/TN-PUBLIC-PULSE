@@ -46,10 +46,10 @@ const LivePulseBanner: React.FC = () => {
               <Zap size={12} className="animate-pulse" />
               Real-Time Community Pulse
             </div>
-            <h3 className="text-3xl sm:text-5xl font-black text-white font-display tracking-tighter leading-none">
+            <h3 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white font-display tracking-tighter leading-tight">
               Who's <span className="text-emerald-400">Winning</span> the Digital Wave?
             </h3>
-            <p className="text-zinc-400 font-medium text-sm sm:text-lg max-w-xl">
+            <p className="text-zinc-400 font-medium text-xs sm:text-base lg:text-lg max-w-xl">
               Join {totalVotes.toLocaleString()} others in shaping the future. Every opinion counts in this live pulse of Tamil Nadu.
             </p>
             <div className="flex flex-wrap justify-center lg:justify-start gap-3">

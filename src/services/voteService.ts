@@ -22,7 +22,10 @@ import { db } from './firebase';
 export interface VoteData {
   nickname?: string | null;
   district: string;
+  constituency: string;
   party: string;
+  ageGroup?: string;
+  demographic?: 'Urban' | 'Rural';
 }
 
 export interface Comment {
@@ -130,7 +133,9 @@ export const submitVote = async (data: VoteData) => {
   await addDoc(votesRef, {
     ...data,
     deviceId,
-    timestamp: serverTimestamp()
+    timestamp: serverTimestamp(),
+    ageGroup: data.ageGroup || 'Not Specified',
+    demographic: data.demographic || 'Not Specified'
   });
 
   const votedParties = getVotedPartiesLocally();
@@ -169,6 +174,52 @@ export const getDistrictResults = async (district: string) => {
   });
 
   return results;
+};
+
+export const getConstituencyResults = async (constituency: string) => {
+  const votesRef = collection(db, 'votes');
+  const q = query(votesRef, where('constituency', '==', constituency));
+  const querySnapshot = await getDocs(q);
+  
+  if (querySnapshot.empty) return null;
+
+  const results: any = { totalVotes: querySnapshot.size };
+  querySnapshot.forEach((doc) => {
+    const v = doc.data();
+    results[v.party] = (results[v.party] || 0) + 1;
+  });
+
+  return results;
+};
+
+export const getDemographicInsights = async () => {
+  const votesRef = collection(db, 'votes');
+  const querySnapshot = await getDocs(votesRef);
+  
+  const insights: {
+    ageGroups: { [key: string]: { [key: string]: number } };
+    areas: { [key: string]: { [key: string]: number } };
+  } = {
+    ageGroups: {},
+    areas: {}
+  };
+
+  querySnapshot.forEach((doc) => {
+    const v = doc.data();
+    const party = v.party;
+    const ageGroup = v.ageGroup || 'Not Specified';
+    const area = v.demographic || 'Not Specified';
+
+    // Age Group Breakdown
+    if (!insights.ageGroups[ageGroup]) insights.ageGroups[ageGroup] = {};
+    insights.ageGroups[ageGroup][party] = (insights.ageGroups[ageGroup][party] || 0) + 1;
+
+    // Area Breakdown
+    if (!insights.areas[area]) insights.areas[area] = {};
+    insights.areas[area][party] = (insights.areas[area][party] || 0) + 1;
+  });
+
+  return insights;
 };
 
 // --- Comments ---

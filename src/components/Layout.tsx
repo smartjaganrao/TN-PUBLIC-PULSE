@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from './Header';
 import Footer from './Footer';
+import { incrementVisitorCount } from '../services/voteService';
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -10,6 +11,7 @@ const Layout: React.FC = () => {
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
+    incrementVisitorCount();
   }, [location.pathname]);
 
   return (

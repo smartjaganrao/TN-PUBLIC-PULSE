@@ -14,10 +14,14 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="md:col-span-2 space-y-6">
-            <div className="flex flex-col">
-              <h3 className="text-white font-black text-2xl tracking-tighter font-display">{t.title}</h3>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-black mt-1">{t.subtitle}</p>
-            </div>
+            <Link to="/" className="flex items-center gap-4 group">
+              <img 
+                src="/logo.png" 
+                alt="Tamil Pulse Logo" 
+                className="h-32 w-auto object-contain brightness-0 invert"
+                referrerPolicy="no-referrer"
+              />
+            </Link>
             <p className="text-sm leading-relaxed max-w-md font-medium">
               A community-driven prediction engine for the 2026 Tamil Nadu Assembly Elections. 
               Join thousands of citizens in shaping the future discourse.

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../context/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { districts } from '../data/districts';
+import { constituenciesByDistrict, allConstituencies } from '../data/constituencies';
 import { parties, Party } from '../data/parties';
 import PartyImage from '../components/PartyImage';
 import { submitVote, hasVotedForPartyLocally, getVotedPartiesLocally } from '../services/voteService';
@@ -16,8 +17,11 @@ const VotePage: React.FC = () => {
   
   const [nickname, setNickname] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedConstituency, setSelectedConstituency] = useState('');
   const [selectedParty, setSelectedParty] = useState<Party | null>(null);
   const [selectedAlliance, setSelectedAlliance] = useState('RULING');
+  const [ageGroup, setAgeGroup] = useState('');
+  const [demographic, setDemographic] = useState<'Urban' | 'Rural' | ''>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,13 +33,34 @@ const VotePage: React.FC = () => {
   }, []);
 
   const [districtSearch, setDistrictSearch] = useState('');
+  const [constituencySearch, setConstituencySearch] = useState('');
+  const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+  const [showConstituencyDropdown, setShowConstituencyDropdown] = useState(false);
+  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.dropdown-container')) {
+        setShowDistrictDropdown(false);
+        setShowConstituencyDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const filteredDistricts = districts.filter(d => 
     d.toLowerCase().includes(districtSearch.toLowerCase())
-  ).slice(0, 8);
+  );
+
+  const availableConstituencies = selectedDistrict ? constituenciesByDistrict[selectedDistrict] || [] : [];
+  const filteredConstituencies = availableConstituencies.filter(c =>
+    c.toLowerCase().includes(constituencySearch.toLowerCase())
+  );
 
   const handleVote = async () => {
-    if (!selectedDistrict || !selectedParty) {
-      setError('Please select both a district and a party.');
+    if (!selectedDistrict || !selectedConstituency || !selectedParty) {
+      setError('Please select a district, constituency, and a party.');
       return;
     }
 
@@ -46,7 +71,10 @@ const VotePage: React.FC = () => {
       await submitVote({
         nickname: nickname.trim() || null,
         district: selectedDistrict,
-        party: selectedParty.id
+        constituency: selectedConstituency,
+        party: selectedParty.id,
+        ageGroup: ageGroup || undefined,
+        demographic: demographic || undefined
       });
       
       setVotedParties(prev => [...prev, selectedParty.id]);
@@ -177,40 +205,166 @@ const VotePage: React.FC = () => {
               />
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3 relative dropdown-container">
               <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 font-display flex items-center gap-2">
                 <MapPin size={14} /> {t.selectDistrict}
               </label>
-              <input
-                type="text"
-                value={districtSearch}
-                onChange={(e) => setDistrictSearch(e.target.value)}
-                placeholder="Search district..."
-                className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-3 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all font-bold text-sm shadow-inner mb-2"
-              />
-              <div className="flex flex-wrap gap-1.5">
-                {(districtSearch ? filteredDistricts : districts.slice(0, 8)).map(d => (
-                  <button
-                    key={d}
-                    onClick={() => setSelectedDistrict(d)}
-                    className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                      selectedDistrict === d
-                        ? 'bg-[#046A38] text-white shadow-lg scale-105'
-                        : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
-                    }`}
-                  >
-                    {d}
-                  </button>
-                ))}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={selectedDistrict || districtSearch}
+                  onChange={(e) => {
+                    setDistrictSearch(e.target.value);
+                    if (selectedDistrict) setSelectedDistrict('');
+                    setShowDistrictDropdown(true);
+                  }}
+                  onFocus={() => setShowDistrictDropdown(true)}
+                  placeholder="Search district..."
+                  className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-4 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all font-bold text-sm shadow-inner"
+                />
+                <AnimatePresence>
+                  {showDistrictDropdown && filteredDistricts.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white border border-zinc-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar"
+                    >
+                      {filteredDistricts.map(d => (
+                        <button
+                          key={d}
+                          onClick={() => {
+                            setSelectedDistrict(d);
+                            setDistrictSearch('');
+                            setShowDistrictDropdown(false);
+                            setSelectedConstituency('');
+                          }}
+                          className="w-full text-left px-6 py-3 hover:bg-zinc-50 font-bold text-sm text-zinc-700 transition-colors border-b border-zinc-50 last:border-0"
+                        >
+                          {d}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               {selectedDistrict && (
-                <div className="mt-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between">
-                  <span className="text-[#046A38] font-black text-xs uppercase tracking-widest">Selected: {selectedDistrict}</span>
-                  <button onClick={() => setSelectedDistrict('')} className="text-[#046A38] hover:scale-110 transition-transform">
+                <div className="mt-2 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                  <span className="text-[#046A38] font-black text-xs uppercase tracking-widest">Selected District: {selectedDistrict}</span>
+                  <button onClick={() => { setSelectedDistrict(''); setSelectedConstituency(''); }} className="text-[#046A38] hover:scale-110 transition-transform">
                     <CheckCircle2 size={16} />
                   </button>
                 </div>
               )}
+            </div>
+
+            <AnimatePresence>
+              {selectedDistrict && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3 pt-4 border-t border-zinc-100 relative dropdown-container"
+                >
+                  <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 font-display flex items-center gap-2">
+                    <MapPin size={14} /> Select Constituency
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={selectedConstituency || constituencySearch}
+                      onChange={(e) => {
+                        setConstituencySearch(e.target.value);
+                        if (selectedConstituency) setSelectedConstituency('');
+                        setShowConstituencyDropdown(true);
+                      }}
+                      onFocus={() => setShowConstituencyDropdown(true)}
+                      placeholder="Search constituency..."
+                      className="w-full bg-zinc-50 border border-zinc-100 rounded-2xl px-6 py-4 focus:ring-4 focus:ring-[#046A38]/10 focus:border-[#046A38] outline-none transition-all font-bold text-sm shadow-inner"
+                    />
+                    <AnimatePresence>
+                      {showConstituencyDropdown && filteredConstituencies.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white border border-zinc-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar"
+                        >
+                          {filteredConstituencies.map(c => (
+                            <button
+                              key={c}
+                              onClick={() => {
+                                setSelectedConstituency(c);
+                                setConstituencySearch('');
+                                setShowConstituencyDropdown(false);
+                              }}
+                              className="w-full text-left px-6 py-3 hover:bg-zinc-50 font-bold text-sm text-zinc-700 transition-colors border-b border-zinc-50 last:border-0"
+                            >
+                              {c}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  {selectedConstituency && (
+                    <div className="mt-2 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                      <span className="text-[#046A38] font-black text-xs uppercase tracking-widest">Selected Constituency: {selectedConstituency}</span>
+                      <button onClick={() => setSelectedConstituency('')} className="text-[#046A38] hover:scale-110 transition-transform">
+                        <CheckCircle2 size={16} />
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Demographic Insights (Optional) */}
+            <div className="pt-4 border-t border-zinc-100 space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 font-display">
+                  Demographics (Optional)
+                </label>
+                <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest">Anonymous</span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Age Group</label>
+                  <select 
+                    value={ageGroup}
+                    onChange={(e) => setAgeGroup(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-100 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-[#046A38]/10"
+                  >
+                    <option value="">Select Age</option>
+                    <option value="18-25">18-25</option>
+                    <option value="26-40">26-40</option>
+                    <option value="41-60">41-60</option>
+                    <option value="60+">60+</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Area</label>
+                  <div className="flex bg-zinc-100 p-1 rounded-xl">
+                    <button
+                      onClick={() => setDemographic(demographic === 'Urban' ? '' : 'Urban')}
+                      className={`flex-1 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
+                        demographic === 'Urban' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400'
+                      }`}
+                    >
+                      Urban
+                    </button>
+                    <button
+                      onClick={() => setDemographic(demographic === 'Rural' ? '' : 'Rural')}
+                      className={`flex-1 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
+                        demographic === 'Rural' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400'
+                      }`}
+                    >
+                      Rural
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -218,7 +372,7 @@ const VotePage: React.FC = () => {
           <div className="hidden lg:block">
             <button
               onClick={handleVote}
-              disabled={!selectedParty || !selectedDistrict || isSubmitting}
+              disabled={!selectedParty || !selectedDistrict || !selectedConstituency || isSubmitting}
               className="w-full bg-[#046A38] text-white py-8 rounded-[2.5rem] font-black text-2xl shadow-[0_20px_50px_rgba(16,185,129,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex flex-col items-center justify-center gap-2 group"
             >
               {isSubmitting ? (
@@ -306,7 +460,7 @@ const VotePage: React.FC = () => {
           <div className="lg:hidden">
             <button
               onClick={handleVote}
-              disabled={!selectedParty || !selectedDistrict || isSubmitting}
+              disabled={!selectedParty || !selectedDistrict || !selectedConstituency || isSubmitting}
               className="w-full bg-[#046A38] text-white py-6 rounded-[2rem] font-black text-xl shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
             >
               {isSubmitting ? <Loader2 className="animate-spin" /> : <Vote />}

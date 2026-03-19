@@ -95,10 +95,10 @@ const Banner: React.FC = () => {
                   <TrendingUp size={10} className="sm:w-3 sm:h-3" />
                   {trending[currentIndex].type}
                 </div>
-                <h3 className="text-xl sm:text-5xl font-black text-white font-display tracking-tighter leading-none mb-1 sm:mb-2">
+                <h3 className="text-xl sm:text-3xl lg:text-4xl font-black text-white font-display tracking-tighter leading-tight mb-1 sm:mb-2">
                   {trending[currentIndex].name}
                 </h3>
-                <p className="text-zinc-400 font-medium text-xs sm:text-lg line-clamp-2 sm:line-clamp-none">
+                <p className="text-zinc-400 font-medium text-[10px] sm:text-sm lg:text-base line-clamp-2 sm:line-clamp-none">
                   {trending[currentIndex].description}
                 </p>
               </div>

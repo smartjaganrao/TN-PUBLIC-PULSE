@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { districts } from '../data/districts';
+import { constituenciesByDistrict } from '../data/constituencies';
 import { parties } from '../data/parties';
 import PartyImage from '../components/PartyImage';
 import { 
@@ -20,17 +21,26 @@ import {
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Trophy, MapPin, Globe, Loader2, Database, Trash2, ArrowLeft, Vote, Users, ChevronRight, Share2, Twitter, Facebook, MessageCircle, RefreshCw, Zap, TrendingUp } from 'lucide-react';
-import { clearAllData, subscribeToOverallResults, getDistrictResults } from '../services/voteService';
+import { clearAllData, subscribeToOverallResults, getDistrictResults, getConstituencyResults, getDemographicInsights } from '../services/voteService';
 
 const ResultsPage: React.FC = () => {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [overallData, setOverallData] = useState<any>(null);
   const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedConstituency, setSelectedConstituency] = useState('');
+  const [districtSearch, setDistrictSearch] = useState('');
+  const [constituencySearch, setConstituencySearch] = useState('');
+  const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+  const [showConstituencyDropdown, setShowConstituencyDropdown] = useState(false);
   const [districtData, setDistrictData] = useState<any>(null);
+  const [constituencyData, setConstituencyData] = useState<any>(null);
+  const [demographicInsights, setDemographicInsights] = useState<any>(null);
   const [districtLoading, setDistrictLoading] = useState(false);
+  const [constituencyLoading, setConstituencyLoading] = useState(false);
+  const [demographicsLoading, setDemographicsLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overall' | 'districts' | 'axis' | 'social'>('overall');
+  const [activeTab, setActiveTab] = useState<'overall' | 'districts' | 'axis' | 'demographics'>('overall');
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -38,6 +48,18 @@ const ResultsPage: React.FC = () => {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.dropdown-container')) {
+        setShowDistrictDropdown(false);
+        setShowConstituencyDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const shareUrl = window.location.origin + '/results';
@@ -106,6 +128,52 @@ const ResultsPage: React.FC = () => {
     };
     fetchDistrict();
   }, [selectedDistrict]);
+
+  useEffect(() => {
+    if (!selectedConstituency) {
+      setConstituencyData(null);
+      return;
+    }
+
+    const fetchConstituency = async () => {
+      setConstituencyLoading(true);
+      try {
+        const data = await getConstituencyResults(selectedConstituency);
+        setConstituencyData(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setConstituencyLoading(false);
+      }
+    };
+    fetchConstituency();
+  }, [selectedConstituency]);
+
+  useEffect(() => {
+    if (activeTab === 'demographics') {
+      const fetchDemographics = async () => {
+        setDemographicsLoading(true);
+        try {
+          const data = await getDemographicInsights();
+          setDemographicInsights(data);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setDemographicsLoading(false);
+        }
+      };
+      fetchDemographics();
+    }
+  }, [activeTab]);
+
+  const filteredDistricts = districts.filter(d => 
+    d.toLowerCase().includes(districtSearch.toLowerCase())
+  );
+
+  const availableConstituencies = selectedDistrict ? constituenciesByDistrict[selectedDistrict] || [] : [];
+  const filteredConstituencies = availableConstituencies.filter(c =>
+    c.toLowerCase().includes(constituencySearch.toLowerCase())
+  );
 
   const formatChartData = (data: any) => {
     if (!data) return [];
@@ -192,6 +260,7 @@ const ResultsPage: React.FC = () => {
           {[
             { id: 'overall', label: 'Global', icon: <Globe size={14} /> },
             { id: 'axis', label: 'Three-Axis', icon: <Database size={14} /> },
+            { id: 'demographics', label: 'Demographics', icon: <Users size={14} /> },
             { id: 'districts', label: 'Districts', icon: <MapPin size={14} /> }
           ].map((tab) => (
             <button
@@ -311,12 +380,12 @@ const ResultsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-zinc-100 shadow-sm flex items-center justify-between group">
-                <div className="space-y-1">
-                  <p className="text-xl sm:text-2xl font-black text-zinc-900 font-display tracking-tight">
+              <div className="bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-zinc-100 shadow-sm flex flex-col xs:flex-row items-center justify-between gap-4 group">
+                <div className="space-y-1 text-center xs:text-left">
+                  <p className="text-lg sm:text-xl font-black text-zinc-900 font-display tracking-tight">
                     {overallChartData[0]?.votes > 0 ? Math.round((overallChartData[0].votes / overallData.totalVotes) * 100) : 0}%
                   </p>
-                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400">Dominance</p>
+                  <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-zinc-400">Dominance</p>
                 </div>
                 <div className="h-12 w-12 sm:h-16 sm:w-16">
                   <ResponsiveContainer width="100%" height="100%">
@@ -345,11 +414,11 @@ const ResultsPage: React.FC = () => {
                     <h4 className="text-xl sm:text-2xl font-black font-display tracking-tight">The "New Contender" Factor</h4>
                     <p className="text-white/70 text-xs sm:text-sm font-medium max-w-md">TVK and NTK are showing significant traction among digital-first voters. Their combined vote share is a key metric to watch.</p>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-md p-4 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border border-white/10 text-center min-w-[120px] sm:min-w-[150px]">
-                    <p className="text-3xl sm:text-4xl font-black font-display">
+                  <div className="bg-white/10 backdrop-blur-md p-4 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border border-white/10 text-center min-w-[100px] sm:min-w-[150px]">
+                    <p className="text-2xl sm:text-3xl font-black font-display">
                       {overallData ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%
                     </p>
-                    <p className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-white/60 mt-1">Combined Share</p>
+                    <p className="text-[6px] sm:text-[8px] font-black uppercase tracking-widest text-white/60 mt-1">Combined Share</p>
                   </div>
                 </div>
               </div>
@@ -406,19 +475,19 @@ const ResultsPage: React.FC = () => {
 
                 <div className="flex flex-col justify-center gap-6">
                   {formatAxisData(overallData).map((axis: any, i: number) => (
-                    <div key={i} className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100 flex items-center justify-between group hover:border-zinc-200 transition-all">
+                    <div key={i} className="bg-zinc-50 p-4 sm:p-6 rounded-3xl border border-zinc-100 flex flex-col xs:flex-row items-center justify-between gap-4 group hover:border-zinc-200 transition-all">
                       <div className="flex items-center gap-4">
-                        <div className="w-3 h-12 rounded-full" style={{ backgroundColor: axis.color }} />
+                        <div className="w-2 sm:w-3 h-10 sm:h-12 rounded-full" style={{ backgroundColor: axis.color }} />
                         <div>
-                          <h4 className="text-lg font-black text-zinc-900">{axis.name}</h4>
-                          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{axis.description}</p>
+                          <h4 className="text-base sm:text-lg font-black text-zinc-900">{axis.name}</h4>
+                          <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">{axis.description}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-black text-zinc-900 font-display">
+                      <div className="text-center xs:text-right">
+                        <p className="text-xl sm:text-2xl font-black text-zinc-900 font-display">
                           {overallData?.totalVotes > 0 ? Math.round((axis.votes / overallData.totalVotes) * 100) : 0}%
                         </p>
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{axis.votes} Votes</p>
+                        <p className="text-[8px] sm:text-[10px] font-black text-zinc-500 uppercase tracking-widest">{axis.votes} Votes</p>
                       </div>
                     </div>
                   ))}
@@ -443,6 +512,132 @@ const ResultsPage: React.FC = () => {
           </motion.div>
         )}
 
+        {activeTab === 'demographics' && (
+          <motion.div
+            key="demographics"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-8"
+          >
+            <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                <div>
+                  <h3 className="text-3xl font-black font-display tracking-tight">Demographic Insights</h3>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-1">Anonymous data segments showing voting patterns</p>
+                </div>
+                {demographicsLoading && <Loader2 className="animate-spin text-[#046A38]" />}
+              </div>
+
+              {demographicInsights ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  {/* Age Group Breakdown */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-indigo-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                        <Users size={20} />
+                      </div>
+                      <h4 className="text-xl font-black font-display uppercase tracking-tight">Age Group Lean</h4>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {Object.entries(demographicInsights.ageGroups).map(([age, partyData]: [string, any]) => {
+                        const topPartyId = Object.entries(partyData).sort((a: any, b: any) => b[1] - a[1])[0]?.[0];
+                        const topParty = parties.find(p => p.id === topPartyId);
+                        const totalAgeVotes = Object.values(partyData).reduce((a: any, b: any) => a + b, 0) as number;
+                        
+                        return (
+                          <div key={age} className="bg-zinc-50 p-5 rounded-3xl border border-zinc-100">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-sm font-black text-zinc-900">{age}</span>
+                              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{totalAgeVotes} Responses</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-white border border-zinc-200 p-1.5 flex-shrink-0">
+                                <PartyImage src={topParty?.image || ''} alt="" className="w-full h-full object-contain" fallbackText={topParty?.name || '?'} />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-[10px] font-black text-zinc-700 uppercase tracking-tight">{topParty?.name || 'No Data'}</span>
+                                  <span className="text-[10px] font-black text-zinc-900">
+                                    {totalAgeVotes > 0 ? Math.round((partyData[topPartyId] / totalAgeVotes) * 100) : 0}%
+                                  </span>
+                                </div>
+                                <div className="w-full h-2 bg-zinc-200 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full transition-all duration-1000" 
+                                    style={{ 
+                                      width: `${totalAgeVotes > 0 ? (partyData[topPartyId] / totalAgeVotes) * 100 : 0}%`,
+                                      backgroundColor: topParty?.color || '#141414'
+                                    }} 
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Area Breakdown */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-100">
+                        <Globe size={20} />
+                      </div>
+                      <h4 className="text-xl font-black font-display uppercase tracking-tight">Urban vs Rural Pulse</h4>
+                    </div>
+
+                    <div className="space-y-4">
+                      {Object.entries(demographicInsights.areas).map(([area, partyData]: [string, any]) => {
+                        const topPartyId = Object.entries(partyData).sort((a: any, b: any) => b[1] - a[1])[0]?.[0];
+                        const topParty = parties.find(p => p.id === topPartyId);
+                        const totalAreaVotes = Object.values(partyData).reduce((a: any, b: any) => a + b, 0) as number;
+
+                        return (
+                          <div key={area} className="bg-zinc-50 p-5 rounded-3xl border border-zinc-100">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-sm font-black text-zinc-900">{area}</span>
+                              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{totalAreaVotes} Responses</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-white border border-zinc-200 p-1.5 flex-shrink-0">
+                                <PartyImage src={topParty?.image || ''} alt="" className="w-full h-full object-contain" fallbackText={topParty?.name || '?'} />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-[10px] font-black text-zinc-700 uppercase tracking-tight">{topParty?.name || 'No Data'}</span>
+                                  <span className="text-[10px] font-black text-zinc-900">
+                                    {totalAreaVotes > 0 ? Math.round((partyData[topPartyId] / totalAreaVotes) * 100) : 0}%
+                                  </span>
+                                </div>
+                                <div className="w-full h-2 bg-zinc-200 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full transition-all duration-1000" 
+                                    style={{ 
+                                      width: `${totalAreaVotes > 0 ? (partyData[topPartyId] / totalAreaVotes) * 100 : 0}%`,
+                                      backgroundColor: topParty?.color || '#141414'
+                                    }} 
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-20 text-center">
+                  <p className="text-zinc-400 font-black uppercase tracking-widest text-xs">No demographic data available yet</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {activeTab === 'districts' && (
           <motion.div
             key="districts"
@@ -457,52 +652,182 @@ const ResultsPage: React.FC = () => {
                   <MapPin size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black font-display">District Pulse</h3>
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Select a district to see local trends</p>
+                  <h3 className="text-2xl font-black font-display">Regional Pulse</h3>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Select a district or constituency</p>
                 </div>
               </div>
-              <select
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-                className="bg-zinc-50 border border-zinc-100 rounded-xl px-6 py-3 outline-none focus:ring-4 focus:ring-[#046A38]/10 min-w-[250px] font-bold text-zinc-700 appearance-none shadow-sm"
-              >
-                <option value="">-- Select District --</option>
-                {districts.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
+              <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                <div className="relative min-w-[200px] dropdown-container">
+                  <input
+                    type="text"
+                    value={selectedDistrict || districtSearch}
+                    onChange={(e) => {
+                      setDistrictSearch(e.target.value);
+                      if (selectedDistrict) setSelectedDistrict('');
+                      setShowDistrictDropdown(true);
+                    }}
+                    onFocus={() => setShowDistrictDropdown(true)}
+                    placeholder="Search district..."
+                    className="w-full bg-zinc-50 border border-zinc-100 rounded-xl px-6 py-3 outline-none focus:ring-4 focus:ring-[#046A38]/10 font-bold text-zinc-700 shadow-sm"
+                  />
+                  <AnimatePresence>
+                    {showDistrictDropdown && filteredDistricts.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white border border-zinc-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar"
+                      >
+                        {filteredDistricts.map(d => (
+                          <button
+                            key={d}
+                            onClick={() => {
+                              setSelectedDistrict(d);
+                              setDistrictSearch('');
+                              setShowDistrictDropdown(false);
+                              setSelectedConstituency('');
+                            }}
+                            className="w-full text-left px-6 py-3 hover:bg-zinc-50 font-bold text-sm text-zinc-700 transition-colors border-b border-zinc-50 last:border-0"
+                          >
+                            {d}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="relative min-w-[200px] dropdown-container">
+                  <input
+                    type="text"
+                    value={selectedConstituency || constituencySearch}
+                    onChange={(e) => {
+                      setConstituencySearch(e.target.value);
+                      if (selectedConstituency) setSelectedConstituency('');
+                      setShowConstituencyDropdown(true);
+                    }}
+                    onFocus={() => setShowConstituencyDropdown(true)}
+                    disabled={!selectedDistrict}
+                    placeholder="Search constituency..."
+                    className="w-full bg-zinc-50 border border-zinc-100 rounded-xl px-6 py-3 outline-none focus:ring-4 focus:ring-[#046A38]/10 font-bold text-zinc-700 shadow-sm disabled:opacity-50"
+                  />
+                  <AnimatePresence>
+                    {showConstituencyDropdown && filteredConstituencies.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white border border-zinc-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar"
+                      >
+                        {filteredConstituencies.map(c => (
+                          <button
+                            key={c}
+                            onClick={() => {
+                              setSelectedConstituency(c);
+                              setConstituencySearch('');
+                              setShowConstituencyDropdown(false);
+                            }}
+                            className="w-full text-left px-6 py-3 hover:bg-zinc-50 font-bold text-sm text-zinc-700 transition-colors border-b border-zinc-50 last:border-0"
+                          >
+                            {c}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
             </div>
 
-            {selectedDistrict && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-4 bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm flex flex-col items-center text-center justify-center min-h-[300px]">
-                  {districtLoading ? (
-                    <Loader2 className="animate-spin text-[#046A38]" size={32} />
-                  ) : districtData ? (
-                    <div className="space-y-6">
-                      <div className="w-24 h-24 rounded-full flex items-center justify-center text-white text-4xl font-black shadow-2xl mx-auto" style={{ backgroundColor: getLeadingParty(districtData)?.color || '#141414' }}>
-                        {getLeadingParty(districtData)?.name[0] || '?'}
-                      </div>
-                      <div>
-                        <h4 className="text-3xl font-black font-display tracking-tight">{getLeadingParty(districtData)?.name || 'No Leader'}</h4>
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-2">{districtData.totalVotes} Votes Cast</p>
-                      </div>
+            {/* Results Display */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* District Results */}
+              {selectedDistrict && (
+                <div className={`${selectedConstituency ? 'lg:col-span-6' : 'lg:col-span-12'} space-y-4`}>
+                  <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest px-4">District: {selectedDistrict}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-white p-6 rounded-[2rem] border border-zinc-100 shadow-sm">
+                    <div className="md:col-span-4 flex flex-col items-center justify-center text-center p-4 border-b md:border-b-0 md:border-r border-zinc-100">
+                      {districtLoading ? (
+                        <Loader2 className="animate-spin text-[#046A38]" />
+                      ) : districtData ? (
+                        <div className="space-y-4">
+                          <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-black shadow-xl mx-auto" style={{ backgroundColor: getLeadingParty(districtData)?.color || '#141414' }}>
+                            {getLeadingParty(districtData)?.name[0] || '?'}
+                          </div>
+                          <div>
+                            <h5 className="text-xl font-black font-display tracking-tight">{getLeadingParty(districtData)?.name || 'No Leader'}</h5>
+                            <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mt-1">{districtData.totalVotes} Votes</p>
+                          </div>
+                        </div>
+                      ) : <p className="text-zinc-400 text-[10px] font-black uppercase">No Data</p>}
                     </div>
-                  ) : <p className="text-zinc-400 font-black uppercase tracking-widest text-xs">No votes in this district</p>}
+                    <div className="md:col-span-8 h-[200px]">
+                      {districtData && (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart layout="vertical" data={formatChartData(districtData)}>
+                            <XAxis type="number" hide />
+                            <YAxis dataKey="name" type="category" fontSize={8} axisLine={false} tickLine={false} width={60} fontWeight={800} />
+                            <Bar dataKey="votes" radius={[0, 4, 4, 0]} barSize={20}>
+                              {formatChartData(districtData).map((entry: any, index: number) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="lg:col-span-8 bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm h-[300px]">
-                  {districtData && (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart layout="vertical" data={formatChartData(districtData)}>
-                        <XAxis type="number" hide />
-                        <YAxis dataKey="name" type="category" fontSize={10} axisLine={false} tickLine={false} width={80} fontWeight={800} />
-                        <Bar dataKey="votes" radius={[0, 6, 6, 0]} barSize={30}>
-                          {formatChartData(districtData).map((entry: any, index: number) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  )}
+              )}
+
+              {/* Constituency Results */}
+              {selectedConstituency && (
+                <div className="lg:col-span-6 space-y-4">
+                  <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest px-4">Constituency: {selectedConstituency}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-zinc-900 text-white p-6 rounded-[2rem] shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] -mr-16 -mt-16" />
+                    <div className="md:col-span-4 flex flex-col items-center justify-center text-center p-4 border-b md:border-b-0 md:border-r border-white/10 relative z-10">
+                      {constituencyLoading ? (
+                        <Loader2 className="animate-spin text-emerald-400" />
+                      ) : constituencyData ? (
+                        <div className="space-y-4">
+                          <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-black shadow-xl mx-auto border-2 border-white/20" style={{ backgroundColor: getLeadingParty(constituencyData)?.color || '#141414' }}>
+                            {getLeadingParty(constituencyData)?.name[0] || '?'}
+                          </div>
+                          <div>
+                            <h5 className="text-xl font-black font-display tracking-tight text-white">{getLeadingParty(constituencyData)?.name || 'No Leader'}</h5>
+                            <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mt-1">{constituencyData.totalVotes} Votes</p>
+                          </div>
+                        </div>
+                      ) : <p className="text-zinc-500 text-[10px] font-black uppercase">No Data</p>}
+                    </div>
+                    <div className="md:col-span-8 h-[200px] relative z-10">
+                      {constituencyData && (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart layout="vertical" data={formatChartData(constituencyData)}>
+                            <XAxis type="number" hide />
+                            <YAxis dataKey="name" type="category" fontSize={8} axisLine={false} tickLine={false} width={60} fontWeight={800} stroke="#a1a1aa" />
+                            <Bar dataKey="votes" radius={[0, 4, 4, 0]} barSize={20}>
+                              {formatChartData(constituencyData).map((entry: any, index: number) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {!selectedDistrict && (
+              <div className="bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-[2.5rem] p-20 text-center">
+                <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                  <MapPin className="text-zinc-300" size={40} />
+                </div>
+                <h4 className="text-xl font-black text-zinc-400 font-display uppercase tracking-widest">Select a district to begin</h4>
+                <p className="text-zinc-400 text-sm mt-2">Deep-dive into local trends across Tamil Nadu</p>
               </div>
             )}
           </motion.div>
