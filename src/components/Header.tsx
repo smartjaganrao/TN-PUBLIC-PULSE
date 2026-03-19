@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Languages, Menu, X, ChevronRight, Users } from 'lucide-react';
+import { Languages, Menu, X, ChevronRight, Users, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { subscribeToVisitorCount } from '../services/voteService';
 
@@ -39,38 +39,56 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
+
   const navLinks = [
-    { path: '/vote', label: 'Vote' },
-    { path: '/results', label: 'Trends' },
-    { path: '/pulse', label: 'Community Pulse' },
+    { path: '/vote', label: t.startVoting },
+    { path: '/results', label: t.viewResults },
+    { path: '/pulse', label: 'Pulse' },
     { path: '/forum', label: 'Debate' },
     { path: '/game', label: 'Quiz' },
-    { path: '/blog', label: 'Blog' },
-    { path: '/shop', label: 'Supporter Shop' },
   ];
 
   const isHomePage = location.pathname === '/';
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-        isScrolled 
-          ? 'py-3 bg-white/90 backdrop-blur-lg shadow-lg text-zinc-900 border-b border-zinc-200' 
-          : isHomePage 
-            ? 'py-6 bg-transparent text-white max-lg:bg-white max-lg:text-zinc-900 max-lg:py-4 max-lg:shadow-sm'
-            : 'py-4 bg-white/80 backdrop-blur-md text-zinc-900 border-b border-zinc-100'
+      className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 ${
+        mobileMenuOpen
+          ? 'h-screen bg-white'
+          : isScrolled 
+            ? 'py-3 bg-white/95 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-b border-zinc-100' 
+            : isHomePage 
+              ? 'py-6 bg-transparent text-white max-lg:bg-white max-lg:text-zinc-900 max-lg:py-4 max-lg:shadow-sm'
+              : 'py-4 bg-white text-zinc-900 border-b border-zinc-100'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-4 group relative">
-            <img 
-              src="/logo.png" 
-              alt="Tamil Pulse Logo" 
-              className="h-16 sm:h-32 w-auto object-contain"
-              referrerPolicy="no-referrer"
-            />
-            {(location.pathname === '/results' || location.pathname === '/') && (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+        <div className={`flex justify-between items-center h-full ${mobileMenuOpen ? 'border-b border-zinc-100' : ''}`}>
+          <Link to="/" className="flex items-center gap-4 group relative" onClick={() => setMobileMenuOpen(false)}>
+            <div className="relative">
+              <img 
+                src="/logo.png" 
+                alt="Tamil Pulse Logo" 
+                className={`transition-all duration-500 object-contain ${
+                  mobileMenuOpen ? 'h-12' : isScrolled ? 'h-10' : 'h-12 sm:h-20 lg:h-32'
+                }`}
+                referrerPolicy="no-referrer"
+              />
+              {!isScrolled && !mobileMenuOpen && (
+                <div className="absolute -inset-2 bg-gradient-to-tr from-emerald-500/10 to-indigo-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              )}
+            </div>
+            {(location.pathname === '/results' || location.pathname === '/') && !mobileMenuOpen && (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -119,78 +137,109 @@ const Header: React.FC = () => {
           </div>
 
           {/* Mobile Toggle */}
-          <button 
-            className={`lg:hidden p-2 rounded-xl transition-colors ${
-              (isScrolled || !isHomePage) ? 'bg-zinc-100 text-zinc-900' : 'bg-white/10 text-white max-lg:bg-zinc-100 max-lg:text-zinc-900'
-            }`}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex items-center gap-3 lg:hidden">
+            {!mobileMenuOpen && (
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
+                className="p-2.5 rounded-xl bg-zinc-100 text-zinc-900 transition-colors"
+              >
+                <Languages size={20} />
+              </button>
+            )}
+            <button 
+              className={`p-3 rounded-2xl transition-all active:scale-95 touch-manipulation ${
+                mobileMenuOpen 
+                  ? 'bg-zinc-100 text-zinc-900' 
+                  : (isScrolled || !isHomePage) 
+                    ? 'bg-zinc-100 text-zinc-900' 
+                    : 'bg-white/10 text-white max-lg:bg-zinc-100 max-lg:text-zinc-900'
+              }`}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Content */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[110] bg-white lg:hidden flex flex-col"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute top-full left-0 right-0 h-[calc(100vh-100%)] bg-white lg:hidden flex flex-col overflow-hidden"
           >
-            <div className="p-6 flex justify-between items-center border-b border-zinc-100">
-              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3">
-                <img 
-                  src="/logo.png" 
-                  alt="Tamil Pulse Logo" 
-                  className="h-24 w-auto object-contain"
-                  referrerPolicy="no-referrer"
-                />
-              </Link>
-              <button 
-                className="p-3 rounded-2xl bg-zinc-100 text-zinc-900"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="flex-1 px-6 py-12 flex flex-col justify-center gap-8 overflow-y-auto">
+            <div className="flex-1 px-6 py-8 flex flex-col gap-2 overflow-y-auto no-scrollbar">
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-4">
+                Navigation
+              </p>
               {navLinks.map((link, i) => (
                 <motion.div
                   key={link.path}
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + i * 0.1 }}
+                  transition={{ delay: i * 0.05 }}
                 >
                   <Link 
                     to={link.path}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between text-5xl font-black text-zinc-900 font-display tracking-tighter group"
+                    className={`flex items-center justify-between py-4 px-6 rounded-2xl transition-all ${
+                      location.pathname === link.path 
+                        ? 'bg-[#046A38]/10 text-[#046A38]' 
+                        : 'text-zinc-900 hover:bg-zinc-50'
+                    }`}
                   >
-                    {link.label}
-                    <ChevronRight size={32} className="text-zinc-200 group-hover:text-[#046A38] transition-colors" />
+                    <span className="text-2xl font-black uppercase tracking-tight">
+                      {link.label}
+                    </span>
+                    <ChevronRight size={20} className={location.pathname === link.path ? 'text-[#046A38]' : 'text-zinc-300'} />
                   </Link>
                 </motion.div>
               ))}
+
+              <div className="mt-8 pt-8 border-t border-zinc-100">
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-6">
+                  Community
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link 
+                    to="/pulse" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex flex-col gap-2 p-5 rounded-3xl bg-zinc-50 border border-zinc-100"
+                  >
+                    <Users size={20} className="text-[#046A38]" />
+                    <span className="text-xs font-black uppercase tracking-wider">Pulse</span>
+                  </Link>
+                  <Link 
+                    to="/forum" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex flex-col gap-2 p-5 rounded-3xl bg-zinc-50 border border-zinc-100"
+                  >
+                    <TrendingUp size={20} className="text-emerald-500" />
+                    <span className="text-xs font-black uppercase tracking-wider">Debate</span>
+                  </Link>
+                </div>
+              </div>
             </div>
 
-            <div className="p-8 border-t border-zinc-100 bg-zinc-50/50">
+            <div className="p-6 border-t border-zinc-100 bg-zinc-50/50">
               <button
                 onClick={() => {
                   setLanguage(language === 'en' ? 'ta' : 'en');
                   setMobileMenuOpen(false);
                 }}
-                className="w-full flex items-center justify-center gap-3 py-5 rounded-3xl bg-zinc-900 text-white font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all"
+                className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-zinc-900 text-white font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all"
               >
-                <Languages size={18} />
+                <Languages size={16} />
                 Switch to {language === 'en' ? 'தமிழ்' : 'English'}
               </button>
-              <p className="text-center text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mt-8">
-                © 2026 Tamil Pulse
-              </p>
+              <div className="flex justify-center gap-6 mt-6">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Privacy</span>
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Terms</span>
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Contact</span>
+              </div>
             </div>
           </motion.div>
         )}

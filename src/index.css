@@ -134,6 +134,26 @@ h1, h2, h3, .font-display {
   transition: opacity 400ms, transform 400ms;
 }
 
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.33%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+/* Custom Scrollbar for Dopamine Tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .page-exit {
   opacity: 1;
   transform: translateY(0);

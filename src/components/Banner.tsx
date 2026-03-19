@@ -80,8 +80,8 @@ const Banner: React.FC = () => {
               />
             </div>
             
-            <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full">
-              <div className="w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-white p-2 sm:p-4 shadow-2xl flex-shrink-0">
+            <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-6 w-full text-center">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-white p-2 sm:p-3 shadow-2xl flex-shrink-0">
                 <PartyImage 
                   src={trending[currentIndex].image} 
                   alt={trending[currentIndex].name} 
@@ -90,7 +90,7 @@ const Banner: React.FC = () => {
                 />
               </div>
               
-              <div className="flex-1 text-center sm:text-left">
+              <div className="flex-1 max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-[7px] sm:text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-2 sm:mb-3">
                   <TrendingUp size={10} className="sm:w-3 sm:h-3" />
                   {trending[currentIndex].type}

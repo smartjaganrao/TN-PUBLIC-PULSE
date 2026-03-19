@@ -17,7 +17,58 @@ import {
   runTransaction,
   deleteDoc
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, auth } from './firebase';
+
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
 
 export interface VoteData {
   nickname?: string | null;
@@ -120,345 +171,487 @@ export const hasVotedForPartyLocally = (partyId: string) => {
 // --- Votes ---
 export const submitVote = async (data: VoteData) => {
   const deviceId = getDeviceId();
+  const path = 'votes';
   
-  // Check if already voted for THIS specific party in Firestore
-  const votesRef = collection(db, 'votes');
-  const q = query(votesRef, where('deviceId', '==', deviceId), where('party', '==', data.party));
-  const querySnapshot = await getDocs(q);
-  
-  if (!querySnapshot.empty) {
-    throw new Error('ALREADY_VOTED_FOR_PARTY');
-  }
+  try {
+    // Check if already voted for THIS specific party in Firestore
+    const votesRef = collection(db, path);
+    const q = query(votesRef, where('deviceId', '==', deviceId), where('party', '==', data.party));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      throw new Error('ALREADY_VOTED_FOR_PARTY');
+    }
 
-  await addDoc(votesRef, {
-    ...data,
-    deviceId,
-    timestamp: serverTimestamp(),
-    ageGroup: data.ageGroup || 'Not Specified',
-    demographic: data.demographic || 'Not Specified'
-  });
+    await addDoc(votesRef, {
+      ...data,
+      deviceId,
+      timestamp: serverTimestamp(),
+      ageGroup: data.ageGroup || 'Not Specified',
+      demographic: data.demographic || 'Not Specified'
+    });
 
-  const votedParties = getVotedPartiesLocally();
-  if (!votedParties.includes(data.party)) {
-    votedParties.push(data.party);
-    localStorage.setItem(VOTE_HISTORY_KEY, JSON.stringify(votedParties));
+    const votedParties = getVotedPartiesLocally();
+    if (!votedParties.includes(data.party)) {
+      votedParties.push(data.party);
+      localStorage.setItem(VOTE_HISTORY_KEY, JSON.stringify(votedParties));
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === 'ALREADY_VOTED_FOR_PARTY') throw error;
+    handleFirestoreError(error, OperationType.WRITE, path);
   }
 };
 
 export const getOverallResults = async () => {
-  const votesRef = collection(db, 'votes');
-  const querySnapshot = await getDocs(votesRef);
-  
-  if (querySnapshot.empty) return null;
-  
-  const results: any = { totalVotes: querySnapshot.size };
-  querySnapshot.forEach((doc) => {
-    const v = doc.data();
-    results[v.party] = (results[v.party] || 0) + 1;
-  });
+  const path = 'votes';
+  try {
+    const votesRef = collection(db, path);
+    const querySnapshot = await getDocs(votesRef);
+    
+    if (querySnapshot.empty) return null;
+    
+    const results: any = { totalVotes: querySnapshot.size };
+    querySnapshot.forEach((doc) => {
+      const v = doc.data();
+      results[v.party] = (results[v.party] || 0) + 1;
+    });
 
-  return results;
+    return results;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+  }
 };
 
 export const getDistrictResults = async (district: string) => {
-  const votesRef = collection(db, 'votes');
-  const q = query(votesRef, where('district', '==', district));
-  const querySnapshot = await getDocs(q);
-  
-  if (querySnapshot.empty) return null;
+  const path = 'votes';
+  try {
+    const votesRef = collection(db, path);
+    const q = query(votesRef, where('district', '==', district));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) return null;
 
-  const results: any = { totalVotes: querySnapshot.size };
-  querySnapshot.forEach((doc) => {
-    const v = doc.data();
-    results[v.party] = (results[v.party] || 0) + 1;
-  });
+    const results: any = { totalVotes: querySnapshot.size };
+    querySnapshot.forEach((doc) => {
+      const v = doc.data();
+      results[v.party] = (results[v.party] || 0) + 1;
+    });
 
-  return results;
+    return results;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+  }
 };
 
 export const getConstituencyResults = async (constituency: string) => {
-  const votesRef = collection(db, 'votes');
-  const q = query(votesRef, where('constituency', '==', constituency));
-  const querySnapshot = await getDocs(q);
-  
-  if (querySnapshot.empty) return null;
+  const path = 'votes';
+  try {
+    const votesRef = collection(db, path);
+    const q = query(votesRef, where('constituency', '==', constituency));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) return null;
 
-  const results: any = { totalVotes: querySnapshot.size };
-  querySnapshot.forEach((doc) => {
-    const v = doc.data();
-    results[v.party] = (results[v.party] || 0) + 1;
-  });
+    const results: any = { totalVotes: querySnapshot.size };
+    querySnapshot.forEach((doc) => {
+      const v = doc.data();
+      results[v.party] = (results[v.party] || 0) + 1;
+    });
 
-  return results;
+    return results;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+  }
 };
 
 export const getDemographicInsights = async () => {
-  const votesRef = collection(db, 'votes');
-  const querySnapshot = await getDocs(votesRef);
-  
-  const insights: {
-    ageGroups: { [key: string]: { [key: string]: number } };
-    areas: { [key: string]: { [key: string]: number } };
-  } = {
-    ageGroups: {},
-    areas: {}
-  };
+  const path = 'votes';
+  try {
+    const votesRef = collection(db, path);
+    const querySnapshot = await getDocs(votesRef);
+    
+    const insights: {
+      ageGroups: { [key: string]: { [key: string]: number } };
+      areas: { [key: string]: { [key: string]: number } };
+    } = {
+      ageGroups: {},
+      areas: {}
+    };
 
-  querySnapshot.forEach((doc) => {
-    const v = doc.data();
-    const party = v.party;
-    const ageGroup = v.ageGroup || 'Not Specified';
-    const area = v.demographic || 'Not Specified';
+    querySnapshot.forEach((doc) => {
+      const v = doc.data();
+      const party = v.party;
+      const ageGroup = v.ageGroup || 'Not Specified';
+      const area = v.demographic || 'Not Specified';
 
-    // Age Group Breakdown
-    if (!insights.ageGroups[ageGroup]) insights.ageGroups[ageGroup] = {};
-    insights.ageGroups[ageGroup][party] = (insights.ageGroups[ageGroup][party] || 0) + 1;
+      // Age Group Breakdown
+      if (!insights.ageGroups[ageGroup]) insights.ageGroups[ageGroup] = {};
+      insights.ageGroups[ageGroup][party] = (insights.ageGroups[ageGroup][party] || 0) + 1;
 
-    // Area Breakdown
-    if (!insights.areas[area]) insights.areas[area] = {};
-    insights.areas[area][party] = (insights.areas[area][party] || 0) + 1;
-  });
+      // Area Breakdown
+      if (!insights.areas[area]) insights.areas[area] = {};
+      insights.areas[area][party] = (insights.areas[area][party] || 0) + 1;
+    });
 
-  return insights;
+    return insights;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+  }
 };
 
 // --- Comments ---
 export const getComments = async (): Promise<Comment[]> => {
-  const commentsRef = collection(db, 'comments');
-  const q = query(commentsRef, orderBy('timestamp', 'desc'), limit(50));
-  const querySnapshot = await getDocs(q);
-  
-  return querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  } as Comment));
+  const path = 'comments';
+  try {
+    const commentsRef = collection(db, path);
+    const q = query(commentsRef, orderBy('timestamp', 'desc'), limit(50));
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as Comment));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return [];
+  }
 };
 
 export const postComment = async (nickname: string, content: string, partyId?: string) => {
-  const commentsRef = collection(db, 'comments');
-  await addDoc(commentsRef, {
-    nickname,
-    content,
-    partyId: partyId || null,
-    timestamp: serverTimestamp(),
-    replyCount: 0
-  });
+  const path = 'comments';
+  try {
+    const commentsRef = collection(db, path);
+    await addDoc(commentsRef, {
+      nickname,
+      content,
+      partyId: partyId || null,
+      timestamp: serverTimestamp(),
+      replyCount: 0
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 export const postCommentReply = async (commentId: string, nickname: string, content: string) => {
-  const commentRef = doc(db, 'comments', commentId);
-  const repliesRef = collection(db, 'comments', commentId, 'replies');
+  const path = `comments/${commentId}/replies`;
+  try {
+    const commentRef = doc(db, 'comments', commentId);
+    const repliesRef = collection(db, 'comments', commentId, 'replies');
 
-  await runTransaction(db, async (transaction) => {
-    const commentDoc = await transaction.get(commentRef);
-    if (!commentDoc.exists()) throw new Error("Comment does not exist!");
+    await runTransaction(db, async (transaction) => {
+      const commentDoc = await transaction.get(commentRef);
+      if (!commentDoc.exists()) throw new Error("Comment does not exist!");
 
-    transaction.set(doc(repliesRef), {
-      nickname,
-      content,
-      timestamp: serverTimestamp()
+      transaction.set(doc(repliesRef), {
+        nickname,
+        content,
+        timestamp: serverTimestamp()
+      });
+
+      transaction.update(commentRef, {
+        replyCount: increment(1)
+      });
     });
-
-    transaction.update(commentRef, {
-      replyCount: increment(1)
-    });
-  });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 export const likeComment = async (commentId: string) => {
-  const commentRef = doc(db, 'comments', commentId);
-  await updateDoc(commentRef, {
-    likes: increment(1)
-  });
+  const path = `comments/${commentId}`;
+  try {
+    const commentRef = doc(db, 'comments', commentId);
+    await updateDoc(commentRef, {
+      likes: increment(1)
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 export const likeCommentReply = async (commentId: string, replyId: string) => {
-  const replyRef = doc(db, 'comments', commentId, 'replies', replyId);
-  await updateDoc(replyRef, {
-    likes: increment(1)
-  });
+  const path = `comments/${commentId}/replies/${replyId}`;
+  try {
+    const replyRef = doc(db, 'comments', commentId, 'replies', replyId);
+    await updateDoc(replyRef, {
+      likes: increment(1)
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 // --- Shouts (Battle Arena) ---
 export const getShouts = async (): Promise<{ partyId: string; count: number }[]> => {
-  const shoutsRef = collection(db, 'shouts');
-  const querySnapshot = await getDocs(shoutsRef);
-  return querySnapshot.docs.map(doc => ({
-    partyId: doc.id,
-    count: doc.data().count || 0
-  }));
+  const path = 'shouts';
+  try {
+    const shoutsRef = collection(db, path);
+    const querySnapshot = await getDocs(shoutsRef);
+    return querySnapshot.docs.map(doc => ({
+      partyId: doc.id,
+      count: doc.data().count || 0
+    }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return [];
+  }
 };
 
 export const postShout = async (partyId: string) => {
-  const shoutRef = doc(db, 'shouts', partyId);
-  await setDoc(shoutRef, { count: increment(1) }, { merge: true });
+  const path = `shouts/${partyId}`;
+  try {
+    const shoutRef = doc(db, 'shouts', partyId);
+    await setDoc(shoutRef, { count: increment(1) }, { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 // --- Forum ---
 export const getForumTopics = async (): Promise<ForumTopic[]> => {
-  const topicsRef = collection(db, 'forum_topics');
-  const q = query(topicsRef, orderBy('timestamp', 'desc'));
-  const querySnapshot = await getDocs(q);
-  
-  return querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  } as ForumTopic));
+  const path = 'forum_topics';
+  try {
+    const topicsRef = collection(db, path);
+    const q = query(topicsRef, orderBy('timestamp', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as ForumTopic));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return [];
+  }
 };
 
 export const getForumTopic = async (id: string): Promise<ForumTopic> => {
-  const topicRef = doc(db, 'forum_topics', id);
-  const topicDoc = await getDoc(topicRef);
-  
-  if (!topicDoc.exists()) throw new Error('Topic not found');
-  
-  const repliesRef = collection(db, 'forum_topics', id, 'replies');
-  const q = query(repliesRef, orderBy('timestamp', 'asc'));
-  const repliesSnapshot = await getDocs(q);
-  
-  const replies = repliesSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  } as ForumReply));
+  const path = `forum_topics/${id}`;
+  try {
+    const topicRef = doc(db, 'forum_topics', id);
+    const topicDoc = await getDoc(topicRef);
+    
+    if (!topicDoc.exists()) throw new Error('Topic not found');
+    
+    const repliesRef = collection(db, 'forum_topics', id, 'replies');
+    const q = query(repliesRef, orderBy('timestamp', 'asc'));
+    const repliesSnapshot = await getDocs(q);
+    
+    const replies = repliesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as ForumReply));
 
-  return {
-    id: topicDoc.id,
-    ...topicDoc.data(),
-    replies
-  } as ForumTopic;
+    return {
+      id: topicDoc.id,
+      ...topicDoc.data(),
+      replies
+    } as ForumTopic;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    throw error;
+  }
 };
 
 export const postForumTopic = async (nickname: string, title: string, content: string, category: string) => {
-  const topicsRef = collection(db, 'forum_topics');
-  const docRef = await addDoc(topicsRef, {
-    nickname,
-    title,
-    content,
-    category: category || 'General',
-    upvotes: 0,
-    replyCount: 0,
-    timestamp: serverTimestamp()
-  });
-  return { id: docRef.id };
+  const path = 'forum_topics';
+  try {
+    const topicsRef = collection(db, path);
+    const docRef = await addDoc(topicsRef, {
+      nickname,
+      title,
+      content,
+      category: category || 'General',
+      upvotes: 0,
+      replyCount: 0,
+      timestamp: serverTimestamp()
+    });
+    return { id: docRef.id };
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+    throw error;
+  }
 };
 
 export const postForumReply = async (topicId: string, nickname: string, content: string) => {
-  const topicRef = doc(db, 'forum_topics', topicId);
-  const repliesRef = collection(db, 'forum_topics', topicId, 'replies');
+  const path = `forum_topics/${topicId}/replies`;
+  try {
+    const topicRef = doc(db, 'forum_topics', topicId);
+    const repliesRef = collection(db, 'forum_topics', topicId, 'replies');
 
-  await runTransaction(db, async (transaction) => {
-    const topicDoc = await transaction.get(topicRef);
-    if (!topicDoc.exists()) throw new Error("Topic does not exist!");
+    await runTransaction(db, async (transaction) => {
+      const topicDoc = await transaction.get(topicRef);
+      if (!topicDoc.exists()) throw new Error("Topic does not exist!");
 
-    transaction.set(doc(repliesRef), {
-      nickname,
-      content,
-      timestamp: serverTimestamp()
+      transaction.set(doc(repliesRef), {
+        nickname,
+        content,
+        timestamp: serverTimestamp()
+      });
+
+      transaction.update(topicRef, {
+        replyCount: increment(1)
+      });
     });
-
-    transaction.update(topicRef, {
-      replyCount: increment(1)
-    });
-  });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 export const upvoteForumTopic = async (id: string) => {
-  const topicRef = doc(db, 'forum_topics', id);
-  await updateDoc(topicRef, {
-    upvotes: increment(1)
-  });
+  const path = `forum_topics/${id}`;
+  try {
+    const topicRef = doc(db, 'forum_topics', id);
+    await updateDoc(topicRef, {
+      upvotes: increment(1)
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 // --- Blog ---
 export const getBlogPosts = async (): Promise<BlogPost[]> => {
-  const blogRef = collection(db, 'blog_posts');
-  const q = query(blogRef, orderBy('timestamp', 'desc'));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+  const path = 'blog_posts';
+  try {
+    const blogRef = collection(db, path);
+    const q = query(blogRef, orderBy('timestamp', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return [];
+  }
 };
 
 export const getLatestBlogPosts = async (count: number = 3): Promise<BlogPost[]> => {
-  const blogRef = collection(db, 'blog_posts');
-  const q = query(blogRef, orderBy('timestamp', 'desc'), limit(count));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+  const path = 'blog_posts';
+  try {
+    const blogRef = collection(db, path);
+    const q = query(blogRef, orderBy('timestamp', 'desc'), limit(count));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return [];
+  }
 };
 
 export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
-  const blogRef = collection(db, 'blog_posts');
-  const q = query(blogRef, where('slug', '==', slug), limit(1));
-  const querySnapshot = await getDocs(q);
-  if (querySnapshot.empty) return null;
-  const doc = querySnapshot.docs[0];
-  return { id: doc.id, ...doc.data() } as BlogPost;
+  const path = 'blog_posts';
+  try {
+    const blogRef = collection(db, path);
+    const q = query(blogRef, where('slug', '==', slug), limit(1));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as BlogPost;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return null;
+  }
 };
 
 export const postBlogPost = async (post: Omit<BlogPost, 'id' | 'timestamp' | 'views'>) => {
-  const blogRef = collection(db, 'blog_posts');
-  await addDoc(blogRef, {
-    ...post,
-    timestamp: serverTimestamp(),
-    views: 0
-  });
+  const path = 'blog_posts';
+  try {
+    const blogRef = collection(db, path);
+    await addDoc(blogRef, {
+      ...post,
+      timestamp: serverTimestamp(),
+      views: 0
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 export const updateBlogPost = async (id: string, post: Partial<BlogPost>) => {
-  const blogRef = doc(db, 'blog_posts', id);
-  await updateDoc(blogRef, {
-    ...post,
-    lastUpdated: serverTimestamp()
-  });
+  const path = `blog_posts/${id}`;
+  try {
+    const blogRef = doc(db, 'blog_posts', id);
+    await updateDoc(blogRef, {
+      ...post,
+      lastUpdated: serverTimestamp()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 export const incrementBlogViews = async (id: string) => {
-  const blogRef = doc(db, 'blog_posts', id);
-  await updateDoc(blogRef, {
-    views: increment(1)
-  });
+  const path = `blog_posts/${id}`;
+  try {
+    const blogRef = doc(db, 'blog_posts', id);
+    await updateDoc(blogRef, {
+      views: increment(1)
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 // --- Game Challenges ---
 export const createChallenge = async (nickname: string) => {
-  const challengesRef = collection(db, 'challenges');
-  const docRef = await addDoc(challengesRef, {
-    creatorNickname: nickname,
-    timestamp: serverTimestamp()
-  });
-  return docRef.id;
+  const path = 'challenges';
+  try {
+    const challengesRef = collection(db, path);
+    const docRef = await addDoc(challengesRef, {
+      creatorNickname: nickname,
+      timestamp: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+    throw error;
+  }
 };
 
 export const getChallenge = async (challengeId: string): Promise<GameChallenge> => {
-  const challengeRef = doc(db, 'challenges', challengeId);
-  const challengeDoc = await getDoc(challengeRef);
-  
-  if (!challengeDoc.exists()) throw new Error('Challenge not found');
-  
-  const scoresRef = collection(db, 'challenges', challengeId, 'scores');
-  const q = query(scoresRef, orderBy('score', 'desc'), orderBy('timestamp', 'asc'), limit(10));
-  const scoresSnapshot = await getDocs(q);
-  
-  const scores = scoresSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  } as ChallengeScore));
+  const path = `challenges/${challengeId}`;
+  try {
+    const challengeRef = doc(db, 'challenges', challengeId);
+    const challengeDoc = await getDoc(challengeRef);
+    
+    if (!challengeDoc.exists()) throw new Error('Challenge not found');
+    
+    const scoresRef = collection(db, 'challenges', challengeId, 'scores');
+    const q = query(scoresRef, orderBy('score', 'desc'), orderBy('timestamp', 'asc'), limit(10));
+    const scoresSnapshot = await getDocs(q);
+    
+    const scores = scoresSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as ChallengeScore));
 
-  return {
-    id: challengeDoc.id,
-    ...challengeDoc.data(),
-    scores
-  } as GameChallenge;
+    return {
+      id: challengeDoc.id,
+      ...challengeDoc.data(),
+      scores
+    } as GameChallenge;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    throw error;
+  }
 };
 
 export const submitChallengeScore = async (challengeId: string, nickname: string, score: number) => {
-  const scoresRef = collection(db, 'challenges', challengeId, 'scores');
-  await addDoc(scoresRef, {
-    nickname,
-    score,
-    timestamp: serverTimestamp()
-  });
+  const path = `challenges/${challengeId}/scores`;
+  try {
+    const scoresRef = collection(db, 'challenges', challengeId, 'scores');
+    await addDoc(scoresRef, {
+      nickname,
+      score,
+      timestamp: serverTimestamp()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
 };
 
 export const subscribeToChallengeScores = (challengeId: string, callback: (scores: ChallengeScore[]) => void) => {
+  const path = `challenges/${challengeId}/scores`;
   const scoresRef = collection(db, 'challenges', challengeId, 'scores');
   const q = query(scoresRef, orderBy('score', 'desc'), orderBy('timestamp', 'asc'), limit(10));
   return onSnapshot(q, (snapshot) => {
@@ -467,12 +660,15 @@ export const subscribeToChallengeScores = (challengeId: string, callback: (score
       ...doc.data()
     } as ChallengeScore));
     callback(scores);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, path);
   });
 };
 
 // --- Real-time Listeners ---
 export const subscribeToOverallResults = (callback: (results: any) => void) => {
-  const votesRef = collection(db, 'votes');
+  const path = 'votes';
+  const votesRef = collection(db, path);
   return onSnapshot(votesRef, (snapshot) => {
     if (snapshot.empty) {
       callback(null);
@@ -484,22 +680,28 @@ export const subscribeToOverallResults = (callback: (results: any) => void) => {
       results[v.party] = (results[v.party] || 0) + 1;
     });
     callback(results);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, path);
   });
 };
 
 export const subscribeToShouts = (callback: (shouts: { partyId: string; count: number }[]) => void) => {
-  const shoutsRef = collection(db, 'shouts');
+  const path = 'shouts';
+  const shoutsRef = collection(db, path);
   return onSnapshot(shoutsRef, (snapshot) => {
     const shouts = snapshot.docs.map(doc => ({
       partyId: doc.id,
       count: doc.data().count || 0
     }));
     callback(shouts);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, path);
   });
 };
 
 export const subscribeToComments = (callback: (comments: Comment[]) => void) => {
-  const commentsRef = collection(db, 'comments');
+  const path = 'comments';
+  const commentsRef = collection(db, path);
   const q = query(commentsRef, orderBy('timestamp', 'desc'), limit(50));
   return onSnapshot(q, (snapshot) => {
     const comments = snapshot.docs.map(doc => ({
@@ -507,10 +709,13 @@ export const subscribeToComments = (callback: (comments: Comment[]) => void) => 
       ...doc.data()
     } as Comment));
     callback(comments);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, path);
   });
 };
 
 export const subscribeToCommentReplies = (commentId: string, callback: (replies: CommentReply[]) => void) => {
+  const path = `comments/${commentId}/replies`;
   const repliesRef = collection(db, 'comments', commentId, 'replies');
   const q = query(repliesRef, orderBy('timestamp', 'asc'));
   return onSnapshot(q, (snapshot) => {
@@ -519,11 +724,14 @@ export const subscribeToCommentReplies = (commentId: string, callback: (replies:
       ...doc.data()
     } as CommentReply));
     callback(replies);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, path);
   });
 };
 
 export const subscribeToForumTopics = (callback: (topics: ForumTopic[]) => void) => {
-  const topicsRef = collection(db, 'forum_topics');
+  const path = 'forum_topics';
+  const topicsRef = collection(db, path);
   const q = query(topicsRef, orderBy('timestamp', 'desc'));
   return onSnapshot(q, (snapshot) => {
     const topics = snapshot.docs.map(doc => ({
@@ -531,23 +739,29 @@ export const subscribeToForumTopics = (callback: (topics: ForumTopic[]) => void)
       ...doc.data()
     } as ForumTopic));
     callback(topics);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, path);
   });
 };
 
 // --- Stats & Visitors ---
 export const incrementVisitorCount = async () => {
+  const path = 'stats/visitors';
   const visitorRef = doc(db, 'stats', 'visitors');
   const visitedKey = 'tn_pulse_visited';
   
-  // Only increment once per session/device if possible, or every time if requested.
-  // Usually, a simple increment on mount is fine for "total views".
   if (!sessionStorage.getItem(visitedKey)) {
-    await setDoc(visitorRef, { count: increment(1) }, { merge: true });
-    sessionStorage.setItem(visitedKey, 'true');
+    try {
+      await setDoc(visitorRef, { count: increment(1) }, { merge: true });
+      sessionStorage.setItem(visitedKey, 'true');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, path);
+    }
   }
 };
 
 export const subscribeToVisitorCount = (callback: (count: number) => void) => {
+  const path = 'stats/visitors';
   const visitorRef = doc(db, 'stats', 'visitors');
   return onSnapshot(visitorRef, (snapshot) => {
     if (snapshot.exists()) {
@@ -555,27 +769,46 @@ export const subscribeToVisitorCount = (callback: (count: number) => void) => {
     } else {
       callback(0);
     }
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, path);
   });
 };
 
 // --- Admin Functions ---
 export const getAllVotes = async () => {
-  const votesRef = collection(db, 'votes');
-  const q = query(votesRef, orderBy('timestamp', 'desc'));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const path = 'votes';
+  try {
+    const votesRef = collection(db, path);
+    const q = query(votesRef, orderBy('timestamp', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return [];
+  }
 };
 
 export const getAllComments = async () => {
-  const commentsRef = collection(db, 'comments');
-  const q = query(commentsRef, orderBy('timestamp', 'desc'));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const path = 'comments';
+  try {
+    const commentsRef = collection(db, path);
+    const q = query(commentsRef, orderBy('timestamp', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return [];
+  }
 };
 
 export const deleteDocument = async (collectionName: string, id: string) => {
-  const docRef = doc(db, collectionName, id);
-  await deleteDoc(docRef);
+  const path = `${collectionName}/${id}`;
+  try {
+    const docRef = doc(db, collectionName, id);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
 };
 
 // --- Dev Tools ---

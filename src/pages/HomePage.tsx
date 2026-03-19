@@ -3,18 +3,23 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../context/LanguageContext';
 import { motion } from 'motion/react';
-import { Vote, BarChart3, Users, ChevronRight, AlertCircle, MessageSquare, Target, Trophy, Eye, Share2, Zap, ShoppingBag, BookOpen, ArrowRight } from 'lucide-react';
+import { Vote, BarChart3, Users, ChevronRight, AlertCircle, MessageSquare, Target, Trophy, Eye, Share2, Zap, ShoppingBag, BookOpen, ArrowRight, Image as ImageIcon, Loader2 } from 'lucide-react';
 import Countdown from '../components/Countdown';
 import Banner from '../components/Banner';
 import LivePulseBanner from '../components/LivePulseBanner';
+import ShareableResultCard from '../components/ShareableResultCard';
+import { toPng } from 'html-to-image';
 import { getOverallResults, incrementVisitorCount, subscribeToVisitorCount, getLatestBlogPosts, BlogPost } from '../services/voteService';
 
 const HomePage: React.FC = () => {
   const { t } = useLanguage();
   const [totalVotes, setTotalVotes] = useState<number>(0);
+  const [overallData, setOverallData] = useState<any>(null);
   const [visitorCount, setVisitorCount] = useState<number>(0);
   const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
   const [showShareMotivation, setShowShareMotivation] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const cardRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowShareMotivation(true), 2000);
@@ -33,6 +38,7 @@ const HomePage: React.FC = () => {
     const fetchVotes = async () => {
       try {
         const results = await getOverallResults();
+        setOverallData(results);
         if (results && results.totalVotes) {
           setTotalVotes(results.totalVotes);
         } else {
@@ -56,6 +62,40 @@ const HomePage: React.FC = () => {
     };
     fetchLatestPosts();
   }, []);
+
+  const handleDownloadImage = async () => {
+    if (!cardRef.current) return;
+    setIsGeneratingImage(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const dataUrl = await toPng(cardRef.current, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: '#09090b',
+      });
+      
+      // Convert dataUrl to File object for sharing
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], `tamil-pulse-trends.png`, { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Tamil Pulse 2026 Trends',
+          text: 'Check out the latest election trends on Tamil Pulse! 🗳️🔥',
+        });
+      } else {
+        const link = document.createElement('a');
+        link.download = `tamil-pulse-trends-${new Date().getTime()}.png`;
+        link.href = dataUrl;
+        link.click();
+      }
+    } catch (err) {
+      console.error('Oops, something went wrong!', err);
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
 
   const handleShare = () => {
     const shareUrl = window.location.origin;
@@ -164,16 +204,35 @@ const HomePage: React.FC = () => {
                 <span>+12.4k shared today</span>
               </div>
             </div>
-            <button 
-              onClick={handleShare}
-              className="w-full md:w-auto bg-white text-zinc-900 px-12 py-5 rounded-full font-black text-xl flex items-center justify-center gap-3 hover:bg-emerald-400 hover:text-white transition-all active:scale-95 shadow-2xl"
-            >
-              <Share2 size={24} />
-              Share Now
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+              <button 
+                onClick={handleShare}
+                className="w-full sm:w-auto bg-white text-zinc-900 px-10 py-5 rounded-full font-black text-xl flex items-center justify-center gap-3 hover:bg-emerald-400 hover:text-white transition-all active:scale-95 shadow-2xl"
+              >
+                <Share2 size={24} />
+                Share Link
+              </button>
+              <button 
+                onClick={handleDownloadImage}
+                disabled={isGeneratingImage}
+                className="w-full sm:w-auto bg-zinc-800 text-white px-10 py-5 rounded-full font-black text-xl flex items-center justify-center gap-3 hover:bg-emerald-400 transition-all active:scale-95 shadow-2xl disabled:opacity-50"
+              >
+                {isGeneratingImage ? <Loader2 size={24} className="animate-spin" /> : <ImageIcon size={24} />}
+                Share Card
+              </button>
+            </div>
           </div>
         </motion.div>
       </section>
+
+      {/* Hidden Shareable Card for Generation */}
+      <ShareableResultCard 
+        cardRef={cardRef}
+        title="Tamil Nadu 2026 Pulse"
+        subtitle="Global Community Trends"
+        data={overallData}
+        totalVotes={totalVotes}
+      />
 
       {/* Bento Dashboard Grid */}
       <div className="max-w-6xl mx-auto w-full px-4 relative z-20 grid grid-cols-1 md:grid-cols-12 gap-6">
