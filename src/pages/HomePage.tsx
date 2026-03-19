@@ -84,7 +84,7 @@ const HomePage: React.FC = () => {
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       {/* Hero Section - Viral & High Impact */}
-      <section className="relative min-h-[65vh] sm:min-h-[75vh] flex items-center justify-center overflow-hidden bg-[#046A38] text-white px-4 rounded-b-[3rem] sm:rounded-b-[6rem] shadow-2xl">
+      <section className="relative min-h-[75vh] sm:min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#046A38] text-white px-4 rounded-b-[3rem] sm:rounded-b-[6rem] shadow-2xl">
         <div className="absolute inset-0 overflow-hidden">
           <motion.div 
             animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
@@ -94,7 +94,7 @@ const HomePage: React.FC = () => {
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
         </div>
         
-        <div className="max-w-6xl mx-auto text-center relative z-10 py-20 sm:py-16">
+        <div className="max-w-6xl mx-auto text-center relative z-10 py-24 sm:py-32">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
