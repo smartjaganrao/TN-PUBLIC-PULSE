@@ -292,7 +292,7 @@ const ResultsPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Users size={14} className="text-rose-400" />
-                <span className="text-[10px] font-black text-white uppercase tracking-widest">Youth Factor: {overallData?.totalVotes > 0 ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%</span>
+                <span className="text-[10px] font-black text-white uppercase tracking-widest">Youth Factor: {overallData ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%</span>
               </div>
             </div>
           ))}
@@ -428,7 +428,7 @@ const ResultsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-black text-zinc-900 font-display tracking-tight">
-                    {overallChartData[0]?.votes > 0 && overallData?.totalVotes > 0 ? Math.round((overallChartData[0].votes / overallData.totalVotes) * 100) : 0}%
+                    {overallChartData[0]?.votes > 0 ? Math.round((overallChartData[0].votes / overallData.totalVotes) * 100) : 0}%
                   </p>
                   <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Dominance Gap</p>
                 </div>
@@ -440,7 +440,7 @@ const ResultsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-black text-zinc-900 font-display tracking-tight">
-                    {overallData?.totalVotes > 0 ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%
+                    {overallData ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%
                   </p>
                   <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Alternative Factor</p>
                 </div>
@@ -535,7 +535,7 @@ const ResultsPage: React.FC = () => {
                       </div>
                       <h3 className="text-5xl font-black tracking-tighter font-display leading-none">{overallLeader.name}</h3>
                       <div className="bg-white/5 backdrop-blur-md px-6 py-2 rounded-full text-[8px] font-black uppercase tracking-widest border border-white/10">
-                        {overallData?.totalVotes || 0} Total Votes
+                        {overallData.totalVotes} Total Votes
                       </div>
                     </>
                   ) : (
@@ -587,7 +587,7 @@ const ResultsPage: React.FC = () => {
                     </div>
                     <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 text-center min-w-[150px]">
                       <p className="text-3xl font-black font-display">
-                        {overallData?.totalVotes > 0 ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%
+                        {overallData ? Math.round(((overallData['TVK'] || 0) + (overallData['NTK'] || 0)) / overallData.totalVotes * 100) : 0}%
                       </p>
                       <p className="text-[8px] font-black uppercase tracking-widest text-white/60 mt-1">Combined Share</p>
                     </div>
@@ -1074,7 +1074,7 @@ const ResultsPage: React.FC = () => {
                                   src={getLeadingParty(districtData)?.image || ''} 
                                   alt="" 
                                   className="w-full h-full object-contain" 
-                                  fallbackText={getLeadingParty(districtData)?.name?.[0] || '?'} 
+                                  fallbackText={getLeadingParty(districtData)?.name[0] || '?'} 
                                 />
                               </div>
                               <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-zinc-900 text-white flex items-center justify-center shadow-xl border-4 border-zinc-50">
@@ -1086,7 +1086,7 @@ const ResultsPage: React.FC = () => {
                               <h5 className="text-2xl font-black font-display tracking-tight text-zinc-900">{getLeadingParty(districtData)?.name || 'No Leader'}</h5>
                               <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 bg-white rounded-full border border-zinc-200 text-[10px] font-black text-zinc-600">
                                 <Users size={12} />
-                                {districtData?.totalVotes > 0 ? Math.round((formatChartData(districtData)[0]?.votes / districtData.totalVotes) * 100) : 0}% Lead
+                                {Math.round((formatChartData(districtData)[0]?.votes / districtData.totalVotes) * 100) || 0}% Lead
                               </div>
                             </div>
                           </motion.div>
@@ -1162,7 +1162,7 @@ const ResultsPage: React.FC = () => {
                                   src={getLeadingParty(constituencyData)?.image || ''} 
                                   alt="" 
                                   className="w-full h-full object-contain" 
-                                  fallbackText={getLeadingParty(constituencyData)?.name?.[0] || '?'} 
+                                  fallbackText={getLeadingParty(constituencyData)?.name[0] || '?'} 
                                 />
                               </div>
                               <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-xl border-4 border-zinc-900">
@@ -1174,7 +1174,7 @@ const ResultsPage: React.FC = () => {
                               <h5 className="text-2xl font-black font-display tracking-tight text-white">{getLeadingParty(constituencyData)?.name || 'No Leader'}</h5>
                               <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10 text-[10px] font-black text-indigo-300">
                                 <TrendingUp size={12} />
-                                {constituencyData?.totalVotes > 0 ? Math.round((formatChartData(constituencyData)[0]?.votes / constituencyData.totalVotes) * 100) : 0}% Support
+                                {Math.round((formatChartData(constituencyData)[0]?.votes / constituencyData.totalVotes) * 100) || 0}% Support
                               </div>
                             </div>
                           </motion.div>
