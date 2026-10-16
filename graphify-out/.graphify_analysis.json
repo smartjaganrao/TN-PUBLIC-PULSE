@@ -1,0 +1,430 @@
+{
+  "communities": {
+    "0": [
+      "src_components_commentsection",
+      "src_components_commentsection_commentitem",
+      "src_components_commentsection_commentsection",
+      "src_pages_adminpage",
+      "src_pages_adminpage_adminpage",
+      "src_pages_blogdetailpage",
+      "src_pages_blogdetailpage_blogdetailpage",
+      "src_pages_bloglistpage",
+      "src_pages_bloglistpage_bloglistpage",
+      "src_pages_gamepage",
+      "src_pages_gamepage_gamepage",
+      "src_pages_gamepage_question",
+      "src_pages_gamepage_questions",
+      "src_services_firebase",
+      "src_services_firebase_app",
+      "src_services_firebase_auth",
+      "src_services_firebase_db",
+      "src_services_firebase_firebaseconfig",
+      "src_services_voteservice",
+      "src_services_voteservice_blogpost",
+      "src_services_voteservice_challengescore",
+      "src_services_voteservice_comment",
+      "src_services_voteservice_commentreply",
+      "src_services_voteservice_createchallenge",
+      "src_services_voteservice_deletedocument",
+      "src_services_voteservice_firestoreerrorinfo",
+      "src_services_voteservice_forumreply",
+      "src_services_voteservice_gamechallenge",
+      "src_services_voteservice_getallcomments",
+      "src_services_voteservice_getallvotes",
+      "src_services_voteservice_getblogpostbyslug",
+      "src_services_voteservice_getblogposts",
+      "src_services_voteservice_getchallenge",
+      "src_services_voteservice_getcomments",
+      "src_services_voteservice_getforumtopics",
+      "src_services_voteservice_getshouts",
+      "src_services_voteservice_handlefirestoreerror",
+      "src_services_voteservice_incrementblogviews",
+      "src_services_voteservice_likecomment",
+      "src_services_voteservice_likecommentreply",
+      "src_services_voteservice_operationtype",
+      "src_services_voteservice_postblogpost",
+      "src_services_voteservice_postcomment",
+      "src_services_voteservice_postcommentreply",
+      "src_services_voteservice_submitchallengescore",
+      "src_services_voteservice_subscribetochallengescores",
+      "src_services_voteservice_subscribetocommentreplies",
+      "src_services_voteservice_subscribetocomments",
+      "src_services_voteservice_updateblogpost",
+      "src_services_voteservice_votedata"
+    ],
+    "1": [
+      "better_sqlite3",
+      "canvas_confetti",
+      "dotenv",
+      "express",
+      "firebase",
+      "google_genai",
+      "html_to_image",
+      "lucide_react",
+      "motion",
+      "package_dependencies",
+      "package_dependencies_better_sqlite3",
+      "package_dependencies_canvas_confetti",
+      "package_dependencies_dotenv",
+      "package_dependencies_express",
+      "package_dependencies_firebase",
+      "package_dependencies_google_genai",
+      "package_dependencies_html_to_image",
+      "package_dependencies_lucide_react",
+      "package_dependencies_motion",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_react_helmet_async",
+      "package_dependencies_react_markdown",
+      "package_dependencies_react_quill",
+      "package_dependencies_react_router_dom",
+      "package_dependencies_recharts",
+      "package_dependencies_tailwindcss_vite",
+      "package_dependencies_types_canvas_confetti",
+      "package_dependencies_types_uuid",
+      "package_dependencies_uuid",
+      "package_dependencies_vitejs_plugin_react",
+      "react",
+      "react_dom",
+      "react_helmet_async",
+      "react_markdown",
+      "react_quill",
+      "react_router_dom",
+      "recharts",
+      "tailwindcss_vite",
+      "types_canvas_confetti",
+      "types_uuid",
+      "uuid",
+      "vitejs_plugin_react"
+    ],
+    "2": [
+      "src_components_livepulsebanner",
+      "src_components_livepulsebanner_livepulsebanner",
+      "src_components_partyimage",
+      "src_components_partyimage_partyimage",
+      "src_components_partyimage_partyimageprops",
+      "src_components_shareableresultcard",
+      "src_components_shareableresultcard_shareableresultcard",
+      "src_components_shareableresultcard_shareableresultcardprops",
+      "src_data_constituencies",
+      "src_data_constituencies_allconstituencies",
+      "src_data_constituencies_constituenciesbydistrict",
+      "src_data_districts",
+      "src_data_districts_districts",
+      "src_data_parties",
+      "src_data_parties_getpartyimage",
+      "src_data_parties_imagemodules",
+      "src_data_parties_parties",
+      "src_data_parties_party",
+      "src_hooks_usemobile",
+      "src_hooks_usemobile_usemobile",
+      "src_pages_resultspage",
+      "src_pages_resultspage_resultspage",
+      "src_pages_votepage",
+      "src_pages_votepage_votepage",
+      "src_services_voteservice_clearalldata",
+      "src_services_voteservice_getconstituencyresults",
+      "src_services_voteservice_getdemographicinsights",
+      "src_services_voteservice_getdeviceid",
+      "src_services_voteservice_getdistrictresults",
+      "src_services_voteservice_getvotedpartieslocally",
+      "src_services_voteservice_hasvotedforpartylocally",
+      "src_services_voteservice_submitvote",
+      "src_services_voteservice_subscribetooverallresults"
+    ],
+    "3": [
+      "autoprefixer",
+      "package",
+      "package_dependencies_vite",
+      "package_devdependencies",
+      "package_devdependencies_autoprefixer",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tsx",
+      "package_devdependencies_types_express",
+      "package_devdependencies_types_node",
+      "package_devdependencies_typescript",
+      "package_devdependencies_vite",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_clean",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_preview",
+      "package_type",
+      "package_version",
+      "tailwindcss",
+      "tsx",
+      "types_express",
+      "types_node",
+      "typescript",
+      "vite"
+    ],
+    "4": [
+      "src_app",
+      "src_app_app",
+      "src_components_errorboundary",
+      "src_components_errorboundary_errorboundary",
+      "src_components_errorboundary_errorboundary_componentdidcatch",
+      "src_components_errorboundary_errorboundary_getderivedstatefromerror",
+      "src_components_errorboundary_errorboundary_handlegohome",
+      "src_components_errorboundary_errorboundary_handlereset",
+      "src_components_errorboundary_errorboundary_render",
+      "src_components_errorboundary_props",
+      "src_components_errorboundary_state",
+      "src_context_languagecontext_languageprovider",
+      "src_main",
+      "src_pages_affiliatepage",
+      "src_pages_affiliatepage_affiliatepage",
+      "src_pages_affiliatepage_affiliateproduct",
+      "src_pages_affiliatepage_products",
+      "src_pages_notfoundpage",
+      "src_pages_notfoundpage_notfoundpage",
+      "src_pages_privacypolicypage",
+      "src_pages_privacypolicypage_privacypolicypage",
+      "src_pages_termsofservicepage",
+      "src_pages_termsofservicepage_termsofservicepage"
+    ],
+    "5": [
+      "src_components_banner",
+      "src_components_banner_banner",
+      "src_components_countdown",
+      "src_components_countdown_countdown",
+      "src_components_footer",
+      "src_components_footer_footer",
+      "src_components_header",
+      "src_components_header_header",
+      "src_components_layout",
+      "src_components_layout_layout",
+      "src_context_languagecontext",
+      "src_context_languagecontext_languagecontext",
+      "src_context_languagecontext_languagecontexttype",
+      "src_context_languagecontext_uselanguage",
+      "src_data_translations",
+      "src_data_translations_language",
+      "src_data_translations_translations",
+      "src_pages_homepage",
+      "src_pages_homepage_homepage",
+      "src_services_voteservice_getlatestblogposts",
+      "src_services_voteservice_getoverallresults",
+      "src_services_voteservice_incrementvisitorcount",
+      "src_services_voteservice_subscribetovisitorcount"
+    ],
+    "6": [
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_es2022",
+      "tsconfig",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_allowimportingtsextensions",
+      "tsconfig_compileroptions_allowjs",
+      "tsconfig_compileroptions_experimentaldecorators",
+      "tsconfig_compileroptions_isolatedmodules",
+      "tsconfig_compileroptions_jsx",
+      "tsconfig_compileroptions_lib",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduledetection",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_noemit",
+      "tsconfig_compileroptions_paths",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_target",
+      "tsconfig_compileroptions_usedefineforclassfields"
+    ],
+    "7": [
+      "src_pages_forumpage",
+      "src_pages_forumpage_forumpage",
+      "src_pages_topicdetailpage",
+      "src_pages_topicdetailpage_topicdetailpage",
+      "src_services_voteservice_forumtopic",
+      "src_services_voteservice_getforumtopic",
+      "src_services_voteservice_postforumreply",
+      "src_services_voteservice_postforumtopic",
+      "src_services_voteservice_subscribetoforumtopics",
+      "src_services_voteservice_upvoteforumtopic"
+    ],
+    "8": [
+      "src_components_battlearena",
+      "src_components_battlearena_battlearena",
+      "src_pages_pulsepage",
+      "src_pages_pulsepage_pulsepage",
+      "src_services_voteservice_postshout",
+      "src_services_voteservice_subscribetoshouts"
+    ],
+    "9": [
+      "server",
+      "server_dirname",
+      "server_filename",
+      "server_startserver"
+    ],
+    "10": [
+      "src_vite_env_d",
+      "src_vite_env_d_importmeta",
+      "src_vite_env_d_importmetaenv"
+    ],
+    "11": [
+      "vite_config"
+    ]
+  },
+  "cohesion": {
+    "0": 0.09142857142857143,
+    "1": 0.046511627906976744,
+    "2": 0.11363636363636363,
+    "3": 0.07407407407407407,
+    "4": 0.09881422924901186,
+    "5": 0.1857707509881423,
+    "6": 0.10526315789473684,
+    "7": 0.35555555555555557,
+    "8": 0.4666666666666667,
+    "9": 0.5,
+    "10": 0.6666666666666666,
+    "11": 1.0
+  },
+  "gods": [
+    {
+      "id": "src_services_voteservice_handlefirestoreerror",
+      "label": "handleFirestoreError()",
+      "degree": 38
+    },
+    {
+      "id": "src_context_languagecontext_uselanguage",
+      "label": "useLanguage()",
+      "degree": 15
+    },
+    {
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 15
+    },
+    {
+      "id": "src_data_parties_parties",
+      "label": "parties",
+      "degree": 9
+    },
+    {
+      "id": "src_pages_resultspage_resultspage",
+      "label": "ResultsPage()",
+      "degree": 9
+    },
+    {
+      "id": "src_pages_adminpage_adminpage",
+      "label": "AdminPage()",
+      "degree": 8
+    },
+    {
+      "id": "src_pages_homepage_homepage",
+      "label": "HomePage()",
+      "degree": 7
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 6
+    },
+    {
+      "id": "src_components_errorboundary_errorboundary",
+      "label": "ErrorBoundary",
+      "degree": 6
+    },
+    {
+      "id": "src_services_voteservice_submitvote",
+      "label": "submitVote()",
+      "degree": 6
+    }
+  ],
+  "surprises": [
+    {
+      "source": "HomePage()",
+      "target": "react",
+      "source_files": [
+        "src/pages/HomePage.tsx",
+        "package.json"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "ResultsPage()",
+      "target": "react",
+      "source_files": [
+        "src/pages/ResultsPage.tsx",
+        "package.json"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Countdown()",
+      "target": "useLanguage()",
+      "source_files": [
+        "src/components/Countdown.tsx",
+        "src/context/LanguageContext.tsx"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `Countdown()` unexpectedly reaches hub `useLanguage()`"
+    },
+    {
+      "source": "Footer()",
+      "target": "useLanguage()",
+      "source_files": [
+        "src/components/Footer.tsx",
+        "src/context/LanguageContext.tsx"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `Footer()` unexpectedly reaches hub `useLanguage()`"
+    },
+    {
+      "source": "LivePulseBanner()",
+      "target": "subscribeToOverallResults()",
+      "source_files": [
+        "src/components/LivePulseBanner.tsx",
+        "src/services/voteService.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `LivePulseBanner()` unexpectedly reaches hub `subscribeToOverallResults()`"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `dependencies` connect `Community 1` to `Community 3`?",
+      "why": "High betweenness centrality (0.405) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `react` connect `Community 1` to `Community 2`, `Community 5`?",
+      "why": "High betweenness centrality (0.348) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `ResultsPage()` connect `Community 2` to `Community 1`, `Community 5`?",
+      "why": "High betweenness centrality (0.192) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `name`, `private`, `version` to the rest of the system?",
+      "why": "74 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.09142857142857143 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 2` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.11363636363636363 - nodes in this community are weakly interconnected."
+    }
+  ]
+}
